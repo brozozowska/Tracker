@@ -35,6 +35,11 @@ class TrackersViewController: UIViewController {
         return label
     }()
     
+    // MARK: - Public Properties
+    var categories: [TrackerCategory] = []
+    var completedTrackers: [TrackerRecord] = []
+
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
