@@ -35,10 +35,18 @@ class TrackersViewController: UIViewController {
         return label
     }()
     
+    private let collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        return collectionView
+    }()
+    
     // MARK: - Public Properties
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
-
+    
+    // MARK: - Private Properties
+    private var selectedDate: Date = Date()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -47,12 +55,40 @@ class TrackersViewController: UIViewController {
         view.backgroundColor = .systemBackground
         
         setupNavigationBar()
+        setupCollectionView()
         addSubviews()
         setupLayout()
     }
     
     // MARK: - Actions
-    @objc private func addTrackerTapped() { }
+    @objc private func addTrackerTapped() {
+        let newTracker = Tracker(
+            title: "Новый трекер",
+            color: .systemBlue,
+            emoji: "🔥",
+            schedule: WeekDay.allCases
+        )
+        
+        if categories.isEmpty {
+            let newCategory = TrackerCategory(title: "Категория 1", trackers: [newTracker])
+            categories = [newCategory]
+        } else {
+            var firstCategory = categories[0]
+            firstCategory = TrackerCategory(
+                title: firstCategory.title,
+                trackers: firstCategory.trackers + [newTracker]
+            )
+            categories[0] = firstCategory
+        }
+        
+        collectionView.reloadData()
+        
+        updateEmptyStateVisibility()
+    }
+    
+    @objc func datePickerValueChanged(_ sender: UIDatePicker) {
+        let selectedDate = sender.date
+    }
     
     // MARK: - Setup Methods
     private func setupNavigationBar() {
@@ -63,11 +99,25 @@ class TrackersViewController: UIViewController {
             action: #selector(addTrackerTapped)
         )
         navigationItem.leftBarButtonItem?.tintColor = .black
+        
+        let datePicker = UIDatePicker()
+        datePicker.datePickerMode = .date
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.date = Date()
+        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+    }
+    
+    private func setupCollectionView() {
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(TrackerCell.self, forCellWithReuseIdentifier: TrackerCell.reuseIdentifier)
     }
 
     private func addSubviews() {
         [
             titleLabel,
+            collectionView,
             emptyStateImageView,
             emptyStateLabel
         ].forEach {
@@ -80,6 +130,11 @@ class TrackersViewController: UIViewController {
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            
+            collectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
 
             emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
@@ -89,5 +144,61 @@ class TrackersViewController: UIViewController {
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: 8)
         ])
+    }
+    
+    // MARK: - Private Methods
+    private func markTrackerAsCompleted(_ tracker: Tracker) {
+        let record = TrackerRecord(trackerId: tracker.id, date: selectedDate)
+        completedTrackers.append(record)
+        collectionView.reloadData()
+    }
+    
+    private func updateEmptyStateVisibility() {
+        let hasTrackers = !categories.flatMap { $0.trackers }.isEmpty
+        emptyStateImageView.isHidden = hasTrackers
+        emptyStateLabel.isHidden = hasTrackers
+        collectionView.isHidden = !hasTrackers
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+extension TrackersViewController: UICollectionViewDataSource {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        numberOfItemsInSection section: Int
+    ) -> Int {
+        return categories.flatMap { $0.trackers }.count
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: TrackerCell.reuseIdentifier,
+            for: indexPath
+        ) as? TrackerCell else { return UICollectionViewCell() }
+        
+        let tracker = categories.flatMap { $0.trackers }[indexPath.item]
+        let completedCount = completedTrackers.filter { $0.trackerId == tracker.id }.count
+        
+        cell.configure(with: tracker, completedCount: completedCount)
+        cell.buttonTapped = { [weak self] tracker in
+            self?.markTrackerAsCompleted(tracker)
+        }
+        
+        return cell
+    }
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension TrackersViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        let width = (collectionView.bounds.width - 16) / 2
+        return CGSize(width: width, height: 100)
     }
 }
