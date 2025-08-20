@@ -10,15 +10,6 @@ import UIKit
 class StatisticsViewController: UIViewController {
     
     // MARK: - UI Elements
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Статистика"
-        label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        label.textAlignment = .left
-        label.textColor = .black
-        return label
-    }()
-    
     private let emptyStateImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(resource: .empty)
@@ -41,14 +32,20 @@ class StatisticsViewController: UIViewController {
         
         view.backgroundColor = .systemBackground
         
+        setupNavigationBar()
         addSubviews()
         setupLayout()
     }
     
     // MARK: - Setup Methods
+    private func setupNavigationBar() {
+        navigationItem.title = "Статистика"
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+    }
+    
     private func addSubviews() {
         [
-            titleLabel,
             emptyStateImageView,
             emptyStateLabel
         ].forEach {
@@ -59,9 +56,6 @@ class StatisticsViewController: UIViewController {
 
     private func setupLayout() {
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-
             emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             emptyStateImageView.heightAnchor.constraint(equalToConstant: 80),

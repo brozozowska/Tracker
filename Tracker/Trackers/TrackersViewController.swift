@@ -10,15 +10,6 @@ import UIKit
 class TrackersViewController: UIViewController {
     
     // MARK: - UI Elements
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Трекеры"
-        label.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        label.textAlignment = .left
-        label.textColor = .black
-        return label
-    }()
-    
     private let emptyStateImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(resource: .empty)
@@ -92,6 +83,10 @@ class TrackersViewController: UIViewController {
     
     // MARK: - Setup Methods
     private func setupNavigationBar() {
+        navigationItem.title = "Трекеры"
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+        
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "plus"),
             style: .plain,
@@ -116,7 +111,6 @@ class TrackersViewController: UIViewController {
 
     private func addSubviews() {
         [
-            titleLabel,
             collectionView,
             emptyStateImageView,
             emptyStateLabel
@@ -128,10 +122,7 @@ class TrackersViewController: UIViewController {
 
     private func setupLayout() {
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            
-            collectionView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
