@@ -72,7 +72,10 @@ class TrackersViewController: UIViewController {
             categories[0] = firstCategory
         }
         
-        collectionView.reloadData()
+        let itemIndex = categories[0].trackers.count - 1
+        let indexPath = IndexPath(item: itemIndex, section: 0)
+
+        collectionView.insertItems(at: [indexPath])
         
         updateEmptyStateVisibility()
     }
@@ -138,10 +141,25 @@ class TrackersViewController: UIViewController {
     }
     
     // MARK: - Private Methods
-    private func markTrackerAsCompleted(_ tracker: Tracker) {
-        let record = TrackerRecord(trackerId: tracker.id, date: selectedDate)
-        completedTrackers.append(record)
-        collectionView.reloadData()
+    private func toggleTrackerCompletion(_ tracker: Tracker) {
+        if let index = completedTrackers.firstIndex(where: { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+        ) {
+            completedTrackers.remove(at: index)
+        } else {
+            let record = TrackerRecord(trackerId: tracker.id, date: selectedDate)
+            completedTrackers.append(record)
+        }
+        
+        guard let itemIndex = categories.flatMap({ $0.trackers }).firstIndex(where: { $0.id == tracker.id }) else { return }
+        
+        let indexPath = IndexPath(item: itemIndex, section: 0)
+        
+        if let cell = collectionView.cellForItem(at: indexPath) as? TrackerCell {
+            let completedCount = completedTrackers.filter({ $0.trackerId == tracker.id }).count
+            let isCompletedToday = completedTrackers.contains { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate)}
+            
+            cell.configure(with: tracker, completedCount: completedCount, isCompletedToday: isCompletedToday)
+        }
     }
     
     private func updateEmptyStateVisibility() {
@@ -171,11 +189,16 @@ extension TrackersViewController: UICollectionViewDataSource {
         ) as? TrackerCell else { return UICollectionViewCell() }
         
         let tracker = categories.flatMap { $0.trackers }[indexPath.item]
-        let completedCount = completedTrackers.filter { $0.trackerId == tracker.id }.count
+        let completedRecords = completedTrackers.filter { $0.trackerId == tracker.id }
+        let completedCount = completedRecords.count
         
-        cell.configure(with: tracker, completedCount: completedCount)
+        let isCompletedToday = completedRecords.contains {
+            Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
+        }
+        
+        cell.configure(with: tracker, completedCount: completedCount, isCompletedToday: isCompletedToday)
         cell.buttonTapped = { [weak self] tracker in
-            self?.markTrackerAsCompleted(tracker)
+            self?.toggleTrackerCompletion(tracker)
         }
         
         return cell

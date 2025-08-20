@@ -21,10 +21,6 @@ final class TrackerCell: UICollectionViewCell {
     
     private let actionButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("+", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 24)
-        button.tintColor = .white
-        button.backgroundColor = .black
         button.layer.cornerRadius = 16
         return button
     }()
@@ -75,9 +71,16 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     // MARK: - Public Methods
-    func configure(with tracker: Tracker, completedCount: Int = 0) {
+    func configure(with tracker: Tracker, completedCount: Int = 0, isCompletedToday: Bool) {
         self.tracker = tracker
         countLabel.text = "Выполнено: \(completedCount)"
+        
+        let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .regular)
+        let symbolName = isCompletedToday ? "checkmark" : "plus"
+        let image = UIImage(systemName: symbolName, withConfiguration: config)
+        actionButton.setImage(image, for: .normal)
+        actionButton.tintColor = .white
+        actionButton.backgroundColor = isCompletedToday ? UIColor.systemGreen.withAlphaComponent(0.3) : UIColor.systemGreen
     }
     
     // MARK: - Actions
