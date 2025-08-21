@@ -38,6 +38,12 @@ class TrackersViewController: UIViewController {
     
     // MARK: - Private Properties
     private var selectedDate: Date = Date()
+    private var visibleTrackers: [Tracker] {
+        let currentWeekDay = weekDay(for: selectedDate)
+        return categories.flatMap { $0.trackers }.filter { tracker in
+            tracker.schedule.contains(currentWeekDay)
+        }
+    }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -53,11 +59,12 @@ class TrackersViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func addTrackerTapped() {
+        let currentWeekDay = weekDay(for: selectedDate)
         let newTracker = Tracker(
             title: "Новый трекер",
             color: .systemBlue,
             emoji: "🔥",
-            schedule: WeekDay.allCases
+            schedule: [currentWeekDay]
         )
         
         if categories.isEmpty {
@@ -71,17 +78,16 @@ class TrackersViewController: UIViewController {
             )
             categories[0] = firstCategory
         }
-        
-        let itemIndex = categories[0].trackers.count - 1
-        let indexPath = IndexPath(item: itemIndex, section: 0)
 
-        collectionView.insertItems(at: [indexPath])
+        collectionView.reloadData()
         
         updateEmptyStateVisibility()
     }
     
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
-        let selectedDate = sender.date
+        selectedDate = sender.date
+        collectionView.reloadData()
+        updateEmptyStateVisibility()
     }
     
     // MARK: - Setup Methods
@@ -142,6 +148,10 @@ class TrackersViewController: UIViewController {
     
     // MARK: - Private Methods
     private func toggleTrackerCompletion(_ tracker: Tracker) {
+        if selectedDate > Date() {
+            return
+        }
+        
         if let index = completedTrackers.firstIndex(where: { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
         ) {
             completedTrackers.remove(at: index)
@@ -150,23 +160,32 @@ class TrackersViewController: UIViewController {
             completedTrackers.append(record)
         }
         
-        guard let itemIndex = categories.flatMap({ $0.trackers }).firstIndex(where: { $0.id == tracker.id }) else { return }
+        guard let itemIndex = visibleTrackers.firstIndex(where: { $0.id == tracker.id }) else { return }
         
         let indexPath = IndexPath(item: itemIndex, section: 0)
         
-        if let cell = collectionView.cellForItem(at: indexPath) as? TrackerCell {
-            let completedCount = completedTrackers.filter({ $0.trackerId == tracker.id }).count
-            let isCompletedToday = completedTrackers.contains { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate)}
-            
-            cell.configure(with: tracker, completedCount: completedCount, isCompletedToday: isCompletedToday)
-        }
+        collectionView.reloadItems(at: [indexPath])
     }
     
     private func updateEmptyStateVisibility() {
-        let hasTrackers = !categories.flatMap { $0.trackers }.isEmpty
-        emptyStateImageView.isHidden = hasTrackers
-        emptyStateLabel.isHidden = hasTrackers
-        collectionView.isHidden = !hasTrackers
+        let isEmpty = visibleTrackers.isEmpty
+        emptyStateImageView.isHidden = !isEmpty
+        emptyStateLabel.isHidden = !isEmpty
+    }
+    
+    private func weekDay(for date: Date) -> WeekDay {
+        let calendar = Calendar.current
+        let weekdayNumber = calendar.component(.weekday, from: date)
+        switch weekdayNumber {
+        case 1: return .monday
+        case 2: return .tuesday
+        case 3: return .wednesday
+        case 4: return .thursday
+        case 5: return .friday
+        case 6: return .saturday
+        case 7: return .sunday
+        default: return .monday
+        }
     }
 }
 
@@ -176,7 +195,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        return categories.flatMap { $0.trackers }.count
+        return visibleTrackers.count
     }
     
     func collectionView(
@@ -188,7 +207,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             for: indexPath
         ) as? TrackerCell else { return UICollectionViewCell() }
         
-        let tracker = categories.flatMap { $0.trackers }[indexPath.item]
+        let tracker = visibleTrackers[indexPath.item]
         let completedRecords = completedTrackers.filter { $0.trackerId == tracker.id }
         let completedCount = completedRecords.count
         
