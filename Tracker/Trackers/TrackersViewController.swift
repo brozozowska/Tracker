@@ -9,6 +9,15 @@ import UIKit
 
 class TrackersViewController: UIViewController {
     
+    // MARK: - Constants
+    private enum UIConstants {
+        static let horizontalInset: CGFloat = 16
+        static let emptyImageSize: CGFloat = 80
+        static let emptyLabelSpacing: CGFloat = 8
+        static let cellHeight: CGFloat = 100
+        static let cellSpacing: CGFloat = 16
+    }
+    
     // MARK: - UI Elements
     private let emptyStateImageView: UIImageView = {
         let imageView = UIImageView()
@@ -33,17 +42,19 @@ class TrackersViewController: UIViewController {
     }()
     
     // MARK: - Public Properties
-    var categories: [TrackerCategory] = []
+    var categories: [TrackerCategory] = [] {
+        didSet { updateVisibleTrackers() }
+    }
+    
     var completedTrackers: [TrackerRecord] = []
     
     // MARK: - Private Properties
-    private var selectedDate: Date = Date()
-    private var visibleTrackers: [Tracker] {
-        let currentWeekDay = weekDay(for: selectedDate)
-        return categories.flatMap { $0.trackers }.filter { tracker in
-            tracker.schedule.contains(currentWeekDay)
-        }
+    private var selectedDate: Date = Date() {
+        didSet { updateVisibleTrackers() }
     }
+    
+    private var visibleTrackers: [Tracker] = []
+
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -55,6 +66,8 @@ class TrackersViewController: UIViewController {
         setupCollectionView()
         addSubviews()
         setupLayout()
+        
+        updateVisibleTrackers()
     }
     
     // MARK: - Actions
@@ -80,14 +93,11 @@ class TrackersViewController: UIViewController {
         }
 
         collectionView.reloadData()
-        
         updateEmptyStateVisibility()
     }
     
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
         selectedDate = sender.date
-        collectionView.reloadData()
-        updateEmptyStateVisibility()
     }
     
     // MARK: - Setup Methods
@@ -108,6 +118,7 @@ class TrackersViewController: UIViewController {
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
         datePicker.date = Date()
+        datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
     }
@@ -132,39 +143,26 @@ class TrackersViewController: UIViewController {
     private func setupLayout() {
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.horizontalInset),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.horizontalInset),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
 
             emptyStateImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            emptyStateImageView.heightAnchor.constraint(equalToConstant: 80),
-            emptyStateImageView.widthAnchor.constraint(equalToConstant: 80),
+            emptyStateImageView.heightAnchor.constraint(equalToConstant: UIConstants.emptyImageSize),
+            emptyStateImageView.widthAnchor.constraint(equalToConstant: UIConstants.emptyImageSize),
             
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: 8)
+            emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: UIConstants.emptyLabelSpacing)
         ])
     }
     
     // MARK: - Private Methods
-    private func toggleTrackerCompletion(_ tracker: Tracker) {
-        if selectedDate > Date() {
-            return
-        }
-        
-        if let index = completedTrackers.firstIndex(where: { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
-        ) {
-            completedTrackers.remove(at: index)
-        } else {
-            let record = TrackerRecord(trackerId: tracker.id, date: selectedDate)
-            completedTrackers.append(record)
-        }
-        
-        guard let itemIndex = visibleTrackers.firstIndex(where: { $0.id == tracker.id }) else { return }
-        
-        let indexPath = IndexPath(item: itemIndex, section: 0)
-        
-        collectionView.reloadItems(at: [indexPath])
+    private func updateVisibleTrackers() {
+        let currentWeekDay = weekDay(for: selectedDate)
+        visibleTrackers = categories.flatMap { $0.trackers }.filter { $0.schedule.contains(currentWeekDay) }
+        collectionView.reloadData()
+        updateEmptyStateVisibility()
     }
     
     private func updateEmptyStateVisibility() {
@@ -173,19 +171,25 @@ class TrackersViewController: UIViewController {
         emptyStateLabel.isHidden = !isEmpty
     }
     
+    private func toggleTrackerCompletion(_ tracker: Tracker) {
+        if selectedDate > Date() { return }
+                
+        if let index = completedTrackers.firstIndex(where: { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }) {
+            completedTrackers.remove(at: index)
+        } else {
+            let record = TrackerRecord(trackerId: tracker.id, date: selectedDate)
+            completedTrackers.append(record)
+        }
+        
+        if let itemIndex = visibleTrackers.firstIndex(where: { $0.id == tracker.id }) {
+            collectionView.reloadItems(at: [IndexPath(item: itemIndex, section: 0)])
+        }
+    }
+    
     private func weekDay(for date: Date) -> WeekDay {
         let calendar = Calendar.current
-        let weekdayNumber = calendar.component(.weekday, from: date)
-        switch weekdayNumber {
-        case 1: return .monday
-        case 2: return .tuesday
-        case 3: return .wednesday
-        case 4: return .thursday
-        case 5: return .friday
-        case 6: return .saturday
-        case 7: return .sunday
-        default: return .monday
-        }
+        let weekdayIndex = (calendar.component(.weekday, from: date) + 5) % 7
+        return WeekDay.allCases[weekdayIndex]
     }
 }
 
@@ -210,7 +214,6 @@ extension TrackersViewController: UICollectionViewDataSource {
         let tracker = visibleTrackers[indexPath.item]
         let completedRecords = completedTrackers.filter { $0.trackerId == tracker.id }
         let completedCount = completedRecords.count
-        
         let isCompletedToday = completedRecords.contains {
             Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
         }
@@ -231,7 +234,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
-        let width = (collectionView.bounds.width - 16) / 2
-        return CGSize(width: width, height: 100)
+        let width = (collectionView.bounds.width - UIConstants.cellSpacing) / 2
+        return CGSize(width: width, height: UIConstants.cellHeight)
     }
 }
