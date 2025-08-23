@@ -9,7 +9,20 @@ import UIKit
 
 final class TrackerCell: UICollectionViewCell {
     
+    // MARK: - Constants
     static let reuseIdentifier = "TrackerCell"
+    
+    private enum ActionButtonStyle {
+        private static let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .regular)
+        static let checkmark = UIImage(systemName: "checkmark", withConfiguration: config)
+        static let plus = UIImage(systemName: "plus", withConfiguration: config)
+    }
+    
+    private enum UIConstants {
+        static let cornerRadius: CGFloat = 16
+        static let buttonSize: CGFloat = 32
+        static let spacing: CGFloat = 6
+    }
     
     // MARK: - UI Elements
     private let countLabel: UILabel = {
@@ -21,22 +34,20 @@ final class TrackerCell: UICollectionViewCell {
     
     private let actionButton: UIButton = {
         let button = UIButton(type: .system)
-        button.layer.cornerRadius = 16
+        button.tintColor = .white
+        button.layer.cornerRadius = UIConstants.cornerRadius
         return button
     }()
     
     // MARK: - Public Properties
-    var buttonTapped: ((Tracker) -> Void)?
-    
-    // MARK: - Private Properties
-    private var tracker: Tracker?
+    var buttonTapped: (() -> Void)?
     
     // MARK: - Lifecycle
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         contentView.backgroundColor = .systemGray6
-        contentView.layer.cornerRadius = 16
+        contentView.layer.cornerRadius = UIConstants.cornerRadius
         
         setupSubviews()
         setupConstraints()
@@ -47,7 +58,12 @@ final class TrackerCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Setup
+    // MARK: - Actions
+    @objc private func didTapActionButton() {
+        buttonTapped?()
+    }
+    
+    // MARK: - Setup Methods
     private func setupSubviews() {
         [
             countLabel,
@@ -64,28 +80,26 @@ final class TrackerCell: UICollectionViewCell {
             countLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             
             actionButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            actionButton.topAnchor.constraint(equalTo: countLabel.bottomAnchor, constant: 6),
-            actionButton.widthAnchor.constraint(equalToConstant: 32),
-            actionButton.heightAnchor.constraint(equalToConstant: 32)
+            actionButton.topAnchor.constraint(equalTo: countLabel.bottomAnchor, constant: UIConstants.spacing),
+            actionButton.widthAnchor.constraint(equalToConstant: UIConstants.buttonSize),
+            actionButton.heightAnchor.constraint(equalToConstant: UIConstants.buttonSize)
         ])
     }
     
     // MARK: - Public Methods
-    func configure(with tracker: Tracker, completedCount: Int = 0, isCompletedToday: Bool) {
-        self.tracker = tracker
+    func configure(completedCount: Int = 0, isCompletedToday: Bool) {
         countLabel.text = "Выполнено: \(completedCount)"
-        
-        let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .regular)
-        let symbolName = isCompletedToday ? "checkmark" : "plus"
-        let image = UIImage(systemName: symbolName, withConfiguration: config)
-        actionButton.setImage(image, for: .normal)
-        actionButton.tintColor = .white
-        actionButton.backgroundColor = isCompletedToday ? UIColor.systemGreen.withAlphaComponent(0.3) : UIColor.systemGreen
+        updateButtonStyle(isCompleted: isCompletedToday)
     }
     
-    // MARK: - Actions
-    @objc private func didTapActionButton() {
-        guard let tracker = tracker else { return }
-        buttonTapped?(tracker)
+    // MARK: - Private Methods
+    private func updateButtonStyle(isCompleted: Bool) {
+        if isCompleted {
+            actionButton.setImage(ActionButtonStyle.checkmark, for: .normal)
+            actionButton.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.3)
+        } else {
+            actionButton.setImage(ActionButtonStyle.plus, for: .normal)
+            actionButton.backgroundColor = UIColor.systemGreen
+        }
     }
 }

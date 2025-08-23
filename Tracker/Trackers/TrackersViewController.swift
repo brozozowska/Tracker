@@ -215,8 +215,8 @@ extension TrackersViewController: UICollectionViewDataSource {
             Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
         }
         
-        cell.configure(with: tracker, completedCount: completedCount, isCompletedToday: isCompletedToday)
-        cell.buttonTapped = { [weak self] tracker in
+        cell.configure(completedCount: completedCount, isCompletedToday: isCompletedToday)
+        cell.buttonTapped = { [weak self] in
             self?.toggleTrackerCompletion(tracker)
         }
         
