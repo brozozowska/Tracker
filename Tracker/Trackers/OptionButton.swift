@@ -27,6 +27,7 @@ final class OptionButton: UIControl {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .regular)
         label.textColor = .label
+        label.isUserInteractionEnabled = false
         return label
     }()
     
@@ -35,6 +36,7 @@ final class OptionButton: UIControl {
         label.font = .systemFont(ofSize: 17)
         label.textColor = .secondaryLabel
         label.isHidden = true
+        label.isUserInteractionEnabled = false
         return label
     }()
     
@@ -42,6 +44,7 @@ final class OptionButton: UIControl {
         let imageView = UIImageView(image: OptionButtonStyle.chevron)
         imageView.tintColor = .systemGray3
         imageView.setContentHuggingPriority(.required, for: .horizontal)
+        imageView.isUserInteractionEnabled = false
         return imageView
     }()
     
@@ -49,6 +52,7 @@ final class OptionButton: UIControl {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = UIConstants.stackSpacing
+        stack.isUserInteractionEnabled = false
         return stack
     }()
     
@@ -57,6 +61,7 @@ final class OptionButton: UIControl {
         stack.axis = .horizontal
         stack.alignment = .center
         stack.spacing = UIConstants.spacing
+        stack.isUserInteractionEnabled = false
         return stack
     }()
     

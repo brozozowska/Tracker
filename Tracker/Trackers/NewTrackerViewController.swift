@@ -17,7 +17,7 @@ protocol NewTrackerViewControllerDelegate: AnyObject {
 }
 
 // MARK: - NewTrackerViewController
-final class NewTrackerViewController: UIViewController {
+final class NewTrackerViewController: UIViewController, NewScheduleViewControllerDelegate {
 
     // MARK: - Constants
     private enum UIConstants {
@@ -274,7 +274,20 @@ final class NewTrackerViewController: UIViewController {
 
     @objc private func categoryTapped() { }
     
-    @objc private func scheduleTapped() { }
+    @objc private func scheduleTapped() {
+        let currentWeekDay = selectedSchedule.first ?? .monday
+        
+        let creator = NewScheduleViewController(initialWeekDay: currentWeekDay)
+        creator.delegate = self
+        
+        let navigationController = UINavigationController(rootViewController: creator)
+        navigationController.modalPresentationStyle = .pageSheet
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.large()]
+        }
+        
+        present(navigationController, animated: true)    }
     
     @objc private func cancelTapped() {
         dismiss(animated: true)
@@ -284,6 +297,13 @@ final class NewTrackerViewController: UIViewController {
         let tracker = Tracker(title: trackerTitle, color: defaultColor, emoji: defaultEmoji, schedule: selectedSchedule)
         delegate?.newTrackerViewController(self, didCreate: tracker, in: defaultCategoryTitle)
         dismiss(animated: true)
+    }
+    
+    // MARK: - NewScheduleViewControllerDelegate
+    func newScheduleViewController(_ viewController: NewScheduleViewController, didSelect schedule: [WeekDay]) {
+        self.selectedSchedule = schedule
+        updateDerivedUI()
+        navigationController?.popViewController(animated: true)
     }
 }
 
