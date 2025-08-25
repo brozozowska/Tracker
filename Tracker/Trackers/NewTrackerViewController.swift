@@ -255,7 +255,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         categoryOption.setValue(defaultCategoryTitle)
         
         scheduleOption.setValue(
-            selectedSchedule.isEmpty ? nil : selectedSchedule.map { $0.rawValue }.joined(separator: ", ")
+            selectedSchedule.isEmpty ? nil : selectedSchedule.formattedWeekDay()
         )
 
         let isValid = !trackerTitle.trimmingCharacters(in: .whitespaces).isEmpty && !selectedSchedule.isEmpty
@@ -275,9 +275,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     @objc private func categoryTapped() { }
     
     @objc private func scheduleTapped() {
-        let currentWeekDay = selectedSchedule.first ?? .monday
-        
-        let creator = NewScheduleViewController(initialWeekDay: currentWeekDay)
+        let creator = NewScheduleViewController(selectedDays: selectedSchedule)
         creator.delegate = self
         
         let navigationController = UINavigationController(rootViewController: creator)
@@ -300,7 +298,10 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     }
     
     // MARK: - NewScheduleViewControllerDelegate
-    func newScheduleViewController(_ viewController: NewScheduleViewController, didSelect schedule: [WeekDay]) {
+    func newScheduleViewController(
+        _ viewController: NewScheduleViewController,
+        didSelect schedule: [WeekDay]
+    ) {
         self.selectedSchedule = schedule
         updateDerivedUI()
         navigationController?.popViewController(animated: true)

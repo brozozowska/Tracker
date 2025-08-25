@@ -54,8 +54,8 @@ final class NewScheduleViewController: UIViewController {
 
 
     // MARK: - Initializers
-    init(initialWeekDay: WeekDay) {
-        self.selectedSchedule = [initialWeekDay]
+    init(selectedDays: [WeekDay]) {
+        self.selectedSchedule = selectedDays
         super.init(nibName: nil, bundle: nil)
     }
 

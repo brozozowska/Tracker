@@ -16,6 +16,26 @@ enum WeekDay: String, CaseIterable {
     case friday = "Пятница"
     case saturday = "Суббота"
     case sunday = "Воскресенье"
+    
+    var shortName: String {
+        switch self {
+        case .monday: return "Пн"
+        case .tuesday: return "Вт"
+        case .wednesday: return "Ср"
+        case .thursday: return "Чт"
+        case .friday: return "Пт"
+        case .saturday: return "Сб"
+        case .sunday: return "Вс"
+        }
+    }
+    
+    static var workdays: [WeekDay] {
+        return [.monday, .tuesday, .wednesday, .thursday, .friday]
+    }
+    
+    static var weekend: [WeekDay] {
+        return [.saturday, .sunday]
+    }
 }
 
 // MARK: - Tracker
@@ -51,4 +71,25 @@ struct TrackerCategory {
 struct TrackerRecord {
     let trackerId: UUID
     let date: Date
+}
+
+// MARK: - Formatted WeekDay
+extension Array where Element == WeekDay {
+    func formattedWeekDay() -> String {
+        let allDays = Set(WeekDay.allCases)
+        let workdays = Set(WeekDay.workdays)
+        let weekend = Set(WeekDay.weekend)
+        let selected = Set(self)
+        
+        if selected == allDays {
+            return "Каждый день"
+        } else if selected == workdays {
+            return "Будние дни"
+        } else if selected == weekend {
+            return "Выходные"
+        } else {
+            let sortedDays = WeekDay.allCases.filter { selected.contains($0) }
+            return sortedDays.map { $0.shortName }.joined(separator: ", ")
+        }
+    }
 }
