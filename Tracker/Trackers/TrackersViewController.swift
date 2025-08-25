@@ -7,7 +7,7 @@
 
 import UIKit
 
-class TrackersViewController: UIViewController {
+class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate {
     
     // MARK: - Constants
     private enum UIConstants {
@@ -73,27 +73,18 @@ class TrackersViewController: UIViewController {
     // MARK: - Actions
     @objc private func addTrackerTapped() {
         let currentWeekDay = weekDay(for: selectedDate)
-        let newTracker = Tracker(
-            title: "Новый трекер",
-            color: .systemBlue,
-            emoji: "🔥",
-            schedule: [currentWeekDay]
-        )
         
-        if categories.isEmpty {
-            let newCategory = TrackerCategory(title: "Категория 1", trackers: [newTracker])
-            categories = [newCategory]
-        } else {
-            var firstCategory = categories[0]
-            firstCategory = TrackerCategory(
-                title: firstCategory.title,
-                trackers: firstCategory.trackers + [newTracker]
-            )
-            categories[0] = firstCategory
+        let creator = NewTrackerViewController(initialWeekDay: currentWeekDay)
+        creator.delegate = self
+        
+        let navigationController = UINavigationController(rootViewController: creator)
+        navigationController.modalPresentationStyle = .pageSheet
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.large()]
         }
-
-        collectionView.reloadData()
-        updateEmptyStateVisibility()
+        
+        present(navigationController, animated: true)
     }
     
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
@@ -190,6 +181,26 @@ class TrackersViewController: UIViewController {
         let calendar = Calendar.current
         let weekdayIndex = (calendar.component(.weekday, from: date) + 5) % 7
         return WeekDay.allCases[weekdayIndex]
+    }
+    
+    // MARK: - NewTrackerViewControllerDelegate
+    func newTrackerViewController(
+        _ viewController: NewTrackerViewController,
+        didCreate tracker: Tracker,
+        in categoryTitle: String
+    ) {
+        if let existingIndex = categories.firstIndex(where: { $0.title == categoryTitle }) {
+            categories[existingIndex] = TrackerCategory(
+                title: categories[existingIndex].title,
+                trackers: categories[existingIndex].trackers + [tracker]
+            )
+        } else {
+            let newCategory = TrackerCategory(title: categoryTitle, trackers: [tracker])
+            categories.append(newCategory)
+        }
+        
+        collectionView.reloadData()
+        updateEmptyStateVisibility()
     }
 }
 
