@@ -53,8 +53,7 @@ class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate
         didSet { updateVisibleTrackers() }
     }
     
-    private var visibleTrackers: [Tracker] = []
-
+    private var visibleCategories: [TrackerCategory] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -117,7 +116,15 @@ class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate
     private func setupCollectionView() {
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.register(TrackerCell.self, forCellWithReuseIdentifier: TrackerCell.reuseIdentifier)
+        collectionView.register(
+            TrackerCell.self,
+            forCellWithReuseIdentifier: TrackerCell.reuseIdentifier
+        )
+        collectionView.register(
+            CategoryHeaderView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: CategoryHeaderView.reuseIdentifier
+        )
     }
 
     private func addSubviews() {
@@ -151,13 +158,16 @@ class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate
     // MARK: - Private Methods
     private func updateVisibleTrackers() {
         let currentWeekDay = weekDay(for: selectedDate)
-        visibleTrackers = categories.flatMap { $0.trackers }.filter { $0.schedule.contains(currentWeekDay) }
+        visibleCategories = categories.compactMap { category in
+            let trackers = category.trackers.filter { $0.schedule.contains(currentWeekDay) }
+            return trackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: trackers)
+        }
         collectionView.reloadData()
         updateEmptyStateVisibility()
     }
     
     private func updateEmptyStateVisibility() {
-        let isEmpty = visibleTrackers.isEmpty
+        let isEmpty = visibleCategories.isEmpty
         emptyStateImageView.isHidden = !isEmpty
         emptyStateLabel.isHidden = !isEmpty
     }
@@ -172,8 +182,11 @@ class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate
             completedTrackers.append(record)
         }
         
-        if let itemIndex = visibleTrackers.firstIndex(where: { $0.id == tracker.id }) {
-            collectionView.reloadItems(at: [IndexPath(item: itemIndex, section: 0)])
+        for (sectionIndex, category) in visibleCategories.enumerated() {
+            if let itemIndex = category.trackers.firstIndex(where: { $0.id == tracker.id }) {
+                collectionView.reloadItems(at: [IndexPath(item: itemIndex, section: sectionIndex)])
+                break
+            }
         }
     }
     
@@ -206,11 +219,15 @@ class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate
 
 // MARK: - UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return visibleCategories.count
+    }
+    
     func collectionView(
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        return visibleTrackers.count
+        return visibleCategories[section].trackers.count
     }
     
     func collectionView(
@@ -222,7 +239,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             for: indexPath
         ) as? TrackerCell else { return UICollectionViewCell() }
         
-        let tracker = visibleTrackers[indexPath.item]
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
         let completedRecords = completedTrackers.filter { $0.trackerId == tracker.id }
         let completedCount = completedRecords.count
         let isCompletedToday = completedRecords.contains {
@@ -242,6 +259,24 @@ extension TrackersViewController: UICollectionViewDataSource {
         
         return cell
     }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else { return UICollectionReusableView() }
+
+        guard let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: CategoryHeaderView.reuseIdentifier,
+            for: indexPath
+        ) as? CategoryHeaderView else { return UICollectionReusableView() }
+
+        let category = visibleCategories[indexPath.section]
+        header.configure(title: category.title)
+        return header
+    }
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
@@ -253,5 +288,13 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     ) -> CGSize {
         let width = (collectionView.bounds.width - UIConstants.cellSpacing) / 2
         return CGSize(width: width, height: UIConstants.cellHeight)
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 30)
     }
 }
