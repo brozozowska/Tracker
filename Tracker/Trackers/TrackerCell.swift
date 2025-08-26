@@ -20,22 +20,65 @@ final class TrackerCell: UICollectionViewCell {
     
     private enum UIConstants {
         static let cornerRadius: CGFloat = 16
-        static let buttonSize: CGFloat = 32
-        static let spacing: CGFloat = 6
+        static let colorViewHeight: CGFloat = 90
+
+        static let circleSize: CGFloat = 24
+        static let circleTopInset: CGFloat = 12
+        static let circleLeftInset: CGFloat = 12
+                
+        static let titleLeftInset: CGFloat = 12
+        static let titleRightInset: CGFloat = 12
+        static let titleBottomInset: CGFloat = 12
+        
+        static let buttonSize: CGFloat = 34
+        static let buttonTopSpacing: CGFloat = 16
+        static let buttonRightInset: CGFloat = 12
+        
+        static let countLabelLeftInset: CGFloat = 12
     }
     
     // MARK: - UI Elements
+    private let colorView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = UIConstants.cornerRadius
+        view.clipsToBounds = true
+        view.backgroundColor = .systemGray6
+        return view
+    }()
+    
+    private let circleView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.3)
+        view.layer.cornerRadius = UIConstants.circleSize / 2
+        return view
+    }()
+    
+    private let emojiLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.textAlignment = .left
+        label.numberOfLines = 2
+        return label
+    }()
+    
     private let countLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        label.textAlignment = .center
+        label.textAlignment = .left
         return label
     }()
     
     private let actionButton: UIButton = {
         let button = UIButton(type: .system)
         button.tintColor = .white
-        button.layer.cornerRadius = UIConstants.cornerRadius
+        button.layer.cornerRadius = UIConstants.buttonSize / 2
         return button
     }()
     
@@ -46,11 +89,12 @@ final class TrackerCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        contentView.backgroundColor = .systemGray6
+        contentView.backgroundColor = .clear
         contentView.layer.cornerRadius = UIConstants.cornerRadius
         
         setupSubviews()
         setupConstraints()
+        
         actionButton.addTarget(self, action: #selector(didTapActionButton), for: .touchUpInside)
     }
     
@@ -66,29 +110,67 @@ final class TrackerCell: UICollectionViewCell {
     // MARK: - Setup Methods
     private func setupSubviews() {
         [
+            colorView,
             countLabel,
             actionButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview($0)
         }
+        
+        [
+            circleView,
+            titleLabel
+        ].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            colorView.addSubview($0)
+        }
+        
+        circleView.addSubview(emojiLabel)
+        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            countLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            countLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            colorView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            colorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            colorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            colorView.heightAnchor.constraint(equalToConstant: UIConstants.colorViewHeight),
             
-            actionButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            actionButton.topAnchor.constraint(equalTo: countLabel.bottomAnchor, constant: UIConstants.spacing),
+            circleView.topAnchor.constraint(equalTo: colorView.topAnchor, constant: UIConstants.circleTopInset),
+            circleView.leadingAnchor.constraint(equalTo: colorView.leadingAnchor, constant: UIConstants.circleLeftInset),
+            circleView.widthAnchor.constraint(equalToConstant: UIConstants.circleSize),
+            circleView.heightAnchor.constraint(equalToConstant: UIConstants.circleSize),
+            
+            emojiLabel.centerXAnchor.constraint(equalTo: circleView.centerXAnchor),
+            emojiLabel.centerYAnchor.constraint(equalTo: circleView.centerYAnchor),
+            
+            titleLabel.leadingAnchor.constraint(equalTo: colorView.leadingAnchor, constant: UIConstants.titleLeftInset),
+            titleLabel.trailingAnchor.constraint(equalTo: colorView.trailingAnchor, constant: -UIConstants.titleRightInset),
+            titleLabel.bottomAnchor.constraint(equalTo: colorView.bottomAnchor, constant: -UIConstants.titleBottomInset),
+            
+            actionButton.topAnchor.constraint(equalTo: colorView.bottomAnchor, constant: UIConstants.buttonTopSpacing),
+            actionButton.trailingAnchor.constraint(equalTo: colorView.trailingAnchor, constant: -UIConstants.buttonRightInset),
             actionButton.widthAnchor.constraint(equalToConstant: UIConstants.buttonSize),
-            actionButton.heightAnchor.constraint(equalToConstant: UIConstants.buttonSize)
+            actionButton.heightAnchor.constraint(equalToConstant: UIConstants.buttonSize),
+            
+            countLabel.centerYAnchor.constraint(equalTo: actionButton.centerYAnchor),
+            countLabel.leadingAnchor.constraint(equalTo: colorView.leadingAnchor, constant: UIConstants.countLabelLeftInset),
         ])
     }
     
     // MARK: - Public Methods
-    func configure(completedCount: Int = 0, isCompletedToday: Bool) {
-        countLabel.text = "Выполнено: \(completedCount)"
+    func configure(
+        title: String,
+        color: UIColor,
+        emoji: String,
+        completedCount: Int = 0,
+        isCompletedToday: Bool
+    ) {
+        titleLabel.text = title
+        colorView.backgroundColor = color
+        emojiLabel.text = emoji
+        countLabel.text = "\(completedCount) дней"
         updateButtonStyle(isCompleted: isCompletedToday)
     }
     

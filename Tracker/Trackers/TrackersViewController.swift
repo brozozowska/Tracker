@@ -14,7 +14,7 @@ class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate
         static let horizontalInset: CGFloat = 16
         static let emptyImageSize: CGFloat = 80
         static let emptyLabelSpacing: CGFloat = 8
-        static let cellHeight: CGFloat = 100
+        static let cellHeight: CGFloat = 148
         static let cellSpacing: CGFloat = 16
     }
     
@@ -229,7 +229,13 @@ extension TrackersViewController: UICollectionViewDataSource {
             Calendar.current.isDate($0.date, inSameDayAs: selectedDate)
         }
         
-        cell.configure(completedCount: completedCount, isCompletedToday: isCompletedToday)
+        cell.configure(
+            title: tracker.title,
+            color: tracker.color,
+            emoji: tracker.emoji,
+            completedCount: completedCount,
+            isCompletedToday: isCompletedToday
+        )
         cell.buttonTapped = { [weak self] in
             self?.toggleTrackerCompletion(tracker)
         }
