@@ -10,7 +10,7 @@ import UIKit
 final class CategoryHeaderView: UICollectionReusableView {
     static let reuseIdentifier = "CategoryHeaderView"
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 19, weight: .bold)
         label.textColor = .label

@@ -38,7 +38,7 @@ final class TrackerCell: UICollectionViewCell {
     }
     
     // MARK: - UI Elements
-    private let colorView: UIView = {
+    private lazy var colorView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = UIConstants.cornerRadius
         view.clipsToBounds = true
@@ -46,21 +46,21 @@ final class TrackerCell: UICollectionViewCell {
         return view
     }()
     
-    private let circleView: UIView = {
+    private lazy var circleView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.3)
         view.layer.cornerRadius = UIConstants.circleSize / 2
         return view
     }()
     
-    private let emojiLabel: UILabel = {
+    private lazy var emojiLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textAlignment = .center
         return label
     }()
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textAlignment = .left
@@ -68,14 +68,14 @@ final class TrackerCell: UICollectionViewCell {
         return label
     }()
     
-    private let countLabel: UILabel = {
+    private lazy var countLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
         label.textAlignment = .left
         return label
     }()
     
-    private let actionButton: UIButton = {
+    private lazy var actionButton: UIButton = {
         let button = UIButton(type: .system)
         button.tintColor = .white
         button.layer.cornerRadius = UIConstants.buttonSize / 2

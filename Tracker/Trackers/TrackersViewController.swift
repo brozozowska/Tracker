@@ -7,7 +7,7 @@
 
 import UIKit
 
-class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate {
+final class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate {
     
     // MARK: - Constants
     private enum UIConstants {
@@ -19,14 +19,14 @@ class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate
     }
     
     // MARK: - UI Elements
-    private let emptyStateImageView: UIImageView = {
+    private lazy var emptyStateImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(resource: .empty)
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
-    private let emptyStateLabel: UILabel = {
+    private lazy var emptyStateLabel: UILabel = {
         let label = UILabel()
         label.text = "Что будем отслеживать?"
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -35,7 +35,7 @@ class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate
         return label
     }()
     
-    private let collectionView: UICollectionView = {
+    private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         return collectionView
@@ -108,7 +108,6 @@ class TrackersViewController: UIViewController, NewTrackerViewControllerDelegate
         datePicker.datePickerMode = .date
         datePicker.preferredDatePickerStyle = .compact
         datePicker.date = Date()
-        datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
     }

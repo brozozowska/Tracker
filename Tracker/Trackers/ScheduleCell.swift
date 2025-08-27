@@ -19,26 +19,26 @@ final class ScheduleCell: UITableViewCell {
     }
 
     // MARK: - UI Elements
-    private let containerView: UIView = {
+    private lazy var containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemGray6
         view.clipsToBounds = true
         return view
     }()
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17)
         label.textColor = .label
         return label
     }()
     
-    private let toggle: UISwitch = {
+    private lazy var toggle: UISwitch = {
         let toggle = UISwitch()
         return toggle
     }()
 
-    private let divider: UIView = {
+    private lazy var divider: UIView = {
         let view = UIView()
         view.backgroundColor = .systemGray4
         return view

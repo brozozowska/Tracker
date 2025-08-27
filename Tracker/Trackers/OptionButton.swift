@@ -23,7 +23,7 @@ final class OptionButton: UIControl {
     }
     
     // MARK: - UI Elements
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .regular)
         label.textColor = .label
@@ -31,7 +31,7 @@ final class OptionButton: UIControl {
         return label
     }()
     
-    private let valueLabel: UILabel = {
+    private lazy var valueLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17)
         label.textColor = .secondaryLabel
@@ -40,7 +40,7 @@ final class OptionButton: UIControl {
         return label
     }()
     
-    private let chevron: UIImageView = {
+    private lazy var chevron: UIImageView = {
         let imageView = UIImageView(image: OptionButtonStyle.chevron)
         imageView.tintColor = .systemGray3
         imageView.setContentHuggingPriority(.required, for: .horizontal)
@@ -48,7 +48,7 @@ final class OptionButton: UIControl {
         return imageView
     }()
     
-    private let labelsStack: UIStackView = {
+    private lazy var labelsStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = UIConstants.stackSpacing
@@ -56,7 +56,7 @@ final class OptionButton: UIControl {
         return stack
     }()
     
-    private let buttonStack: UIStackView = {
+    private lazy var buttonStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.alignment = .center

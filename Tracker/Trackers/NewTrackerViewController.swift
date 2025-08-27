@@ -36,10 +36,10 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     }
 
     // MARK: - UI Elements
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
+    private lazy var scrollView = UIScrollView()
+    private lazy var contentView = UIView()
 
-    private let vStack: UIStackView = {
+    private lazy var vStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
         stack.spacing = UIConstants.vStackSpacing
@@ -47,14 +47,14 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         return stack
     }()
 
-    private let nameContainer: UIView = {
+    private lazy var nameContainer: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.systemGray6
         view.layer.cornerRadius = UIConstants.cornerRadius
         return view
     }()
 
-    private let nameTextField: UITextField = {
+    private lazy var nameTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
         textField.borderStyle = .none
@@ -66,24 +66,24 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         return textField
     }()
 
-    private let optionsContainer: UIView = {
+    private lazy var optionsContainer: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.systemGray6
         view.layer.cornerRadius = UIConstants.cornerRadius
         return view
     }()
 
-    private let categoryOption = OptionButton()
+    private lazy var categoryOption = OptionButton()
     
-    private let divider: UIView = {
+    private lazy var divider: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.systemGray4
         return view
     }()
     
-    private let scheduleOption = OptionButton()
+    private lazy var scheduleOption = OptionButton()
     
-    private let actionsStack: UIStackView = {
+    private lazy var actionsStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.spacing = UIConstants.actionsStackSpacing
@@ -91,7 +91,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         return stack
     }()
 
-    private let cancelButton: UIButton = {
+    private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
         button.setTitleColor(.systemRed, for: .normal)
@@ -101,7 +101,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         return button
     }()
 
-    private let createButton: UIButton = {
+    private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius

@@ -27,7 +27,7 @@ final class NewScheduleViewController: UIViewController {
     }
     
     // MARK: - UI Elements
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.isScrollEnabled = true
         tableView.backgroundColor = .clear
@@ -36,7 +36,7 @@ final class NewScheduleViewController: UIViewController {
         return tableView
     }()
     
-    private let doneButton: UIButton = {
+    private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
         button.backgroundColor = .black

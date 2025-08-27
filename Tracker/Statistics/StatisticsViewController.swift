@@ -10,14 +10,14 @@ import UIKit
 class StatisticsViewController: UIViewController {
     
     // MARK: - UI Elements
-    private let emptyStateImageView: UIImageView = {
+    private lazy var emptyStateImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(resource: .empty)
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
-    private let emptyStateLabel: UILabel = {
+    private lazy var emptyStateLabel: UILabel = {
         let label = UILabel()
         label.text = "Статистика пока пуста"
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
