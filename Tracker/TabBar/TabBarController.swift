@@ -15,6 +15,14 @@ final class TabBarController: UITabBarController {
     }
     
     private func setupTabBar() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .systemBackground
+        appearance.shadowColor = UIColor.separator
+        
+        tabBar.standardAppearance = appearance
+        tabBar.scrollEdgeAppearance = appearance
+        
         let trackersViewController = TrackersViewController()
         let trackersNav = UINavigationController(rootViewController: trackersViewController)
         trackersNav.tabBarItem = UITabBarItem(

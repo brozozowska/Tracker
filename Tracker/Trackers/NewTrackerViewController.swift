@@ -119,11 +119,10 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     private var trackerTitle: String = ""
     private let defaultColor = UIColor.systemGreen
     private let defaultEmoji = "🔥"
-    private var selectedSchedule: [WeekDay]
+    private var selectedSchedule: [WeekDay] = []
 
     // MARK: - Initializers
-    init(initialWeekDay: WeekDay) {
-        self.selectedSchedule = [initialWeekDay]
+    init() {
         super.init(nibName: nil, bundle: nil)
     }
 

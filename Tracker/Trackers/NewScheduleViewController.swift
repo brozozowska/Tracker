@@ -19,6 +19,7 @@ protocol NewScheduleViewControllerDelegate: AnyObject {
 final class NewScheduleViewController: UIViewController {
     // MARK: - Constants
     private enum UIConstants {
+        static let TopOffset: CGFloat = 24
         static let horizontalInset: CGFloat = 16
         static let verticalInset: CGFloat = 16
         static let rowHeight: CGFloat = 75
@@ -93,7 +94,7 @@ final class NewScheduleViewController: UIViewController {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: UIConstants.TopOffset),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.horizontalInset),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.horizontalInset),
             tableView.bottomAnchor.constraint(equalTo: doneButton.topAnchor, constant: -UIConstants.verticalInset),

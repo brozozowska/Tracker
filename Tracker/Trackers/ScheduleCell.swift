@@ -35,6 +35,7 @@ final class ScheduleCell: UITableViewCell {
     
     private lazy var toggle: UISwitch = {
         let toggle = UISwitch()
+        toggle.onTintColor = .systemBlue
         return toggle
     }()
 

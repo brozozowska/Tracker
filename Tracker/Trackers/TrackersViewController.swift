@@ -70,10 +70,8 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     }
     
     // MARK: - Actions
-    @objc private func addTrackerTapped() {
-        let currentWeekDay = weekDay(for: selectedDate)
-        
-        let creator = NewTrackerViewController(initialWeekDay: currentWeekDay)
+    @objc private func addTrackerTapped() {        
+        let creator = NewTrackerViewController()
         creator.delegate = self
         
         let navigationController = UINavigationController(rootViewController: creator)
