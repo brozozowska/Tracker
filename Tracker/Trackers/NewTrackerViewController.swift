@@ -32,14 +32,14 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
         static let cornerRadius: CGFloat = 16
         static let vStackSpacing: CGFloat = 24
-        static let vStackTopSpacing: CGFloat = 16
         static let actionsStackSpacing: CGFloat = 8
         
-        static let emojiCollectionViewHeight: CGFloat = 204
-        static let emojiLabelLeading: CGFloat = 12
-        static let emojiContainerSpacing: CGFloat = 12
-        static let emojiCellSize: CGSize = CGSize(width: 52, height: 52)
-        static let emojiContainerTopSpacing: CGFloat = 32
+        static let collectionViewHeight: CGFloat = 182
+        static let collectionViewVerticalInset: CGFloat = 16
+        static let collectionLabelLeading: CGFloat = 12
+        static let collectionContainerSpacing: CGFloat = 12
+        static let collectionCellSize: CGSize = CGSize(width: 52, height: 52)
+        static let collectionContainerTopSpacing: CGFloat = 32
     }
 
     // MARK: - UI Elements
@@ -93,7 +93,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     private lazy var emojiContainer: UIStackView = {
         let stack = UIStackView()
         stack.axis = .vertical
-        stack.spacing = UIConstants.emojiContainerSpacing
+        stack.spacing = UIConstants.collectionContainerSpacing
         stack.alignment = .fill
         return stack
     }()
@@ -111,8 +111,37 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
-        let itemSize = UIConstants.emojiCellSize
+        let itemSize = UIConstants.collectionCellSize
         layout.itemSize = itemSize
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.isScrollEnabled = false
+        return collectionView
+    }()
+    
+    private lazy var colorContainer: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = UIConstants.collectionContainerSpacing
+        stack.alignment = .fill
+        return stack
+    }()
+
+    private lazy var colorLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Цвет"
+        label.font = .systemFont(ofSize: 19, weight: .bold)
+        label.textColor = .label
+        return label
+    }()
+
+    private lazy var colorCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.minimumLineSpacing = 0
+        layout.minimumInteritemSpacing = 0
+        layout.itemSize = UIConstants.collectionCellSize
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
@@ -154,15 +183,44 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     // MARK: - Private Properties
     private let defaultCategoryTitle = "Важное"
     private var trackerTitle: String = ""
-    private let defaultColor = UIColor.systemGreen
-    private let defaultEmoji = "🔥"
     private var selectedSchedule: [WeekDay] = []
+    
     private let emojis: [String] = [
         "🙂","😻","🌺","🐶","❤️","😱",
         "😇","😡","🥶","🤔","🙌","🍔",
         "🥦","🏓","🥇","🎸","🏝️","😪"
     ]
+    
     private var selectedEmoji: String? {
+        didSet {
+            updateDerivedUI()
+        }
+    }
+    
+    private let colors: [UIColor] = [
+        UIColor(red: 253/255, green: 76/255,  blue: 1/255,   alpha: 1.0),
+        UIColor(red: 255/255, green: 136/255, blue: 30/255,  alpha: 1.0),
+        UIColor(red: 0/255,   green: 123/255, blue: 250/255, alpha: 1.0),
+        UIColor(red: 110/255, green: 68/255,  blue: 254/255, alpha: 1.0),
+        UIColor(red: 51/255,  green: 207/255, blue: 105/255, alpha: 1.0),
+        UIColor(red: 230/255, green: 109/255, blue: 212/255, alpha: 1.0),
+        
+        UIColor(red: 249/255, green: 212/255, blue: 212/255, alpha: 1.0),
+        UIColor(red: 52/255,  green: 167/255, blue: 254/255, alpha: 1.0),
+        UIColor(red: 70/255,  green: 230/255, blue: 157/255, alpha: 1.0),
+        UIColor(red: 53/255,  green: 52/255,  blue: 124/255, alpha: 1.0),
+        UIColor(red: 255/255, green: 103/255, blue: 77/255,  alpha: 1.0),
+        UIColor(red: 255/255, green: 153/255, blue: 204/255, alpha: 1.0),
+        
+        UIColor(red: 246/255, green: 196/255, blue: 139/255, alpha: 1.0),
+        UIColor(red: 121/255, green: 148/255, blue: 245/255, alpha: 1.0),
+        UIColor(red: 131/255, green: 44/255,  blue: 241/255, alpha: 1.0),
+        UIColor(red: 173/255, green: 86/255,  blue: 218/255, alpha: 1.0),
+        UIColor(red: 141/255, green: 114/255, blue: 230/255, alpha: 1.0),
+        UIColor(red: 47/255,  green: 208/255, blue: 88/255,  alpha: 1.0)
+    ]
+    
+    private var selectedColor: UIColor? {
         didSet {
             updateDerivedUI()
         }
@@ -207,6 +265,14 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
             EmojiCell.self,
             forCellWithReuseIdentifier: EmojiCell.reuseId
         )
+        
+        colorCollectionView.dataSource = self
+        colorCollectionView.delegate = self
+        colorCollectionView.register(
+            ColorCell.self,
+            forCellWithReuseIdentifier: ColorCell.reuseId
+        )
+
     }
     
     private func setupSubviews() {
@@ -245,8 +311,14 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         emojiContainer.addArrangedSubview(emojiLabel)
         emojiContainer.addArrangedSubview(emojiCollectionView)
         
-        vStack.setCustomSpacing(UIConstants.emojiContainerTopSpacing, after: optionsContainer)
+        vStack.setCustomSpacing(UIConstants.collectionContainerTopSpacing, after: optionsContainer)
         vStack.addArrangedSubview(emojiContainer)
+        
+        colorContainer.addArrangedSubview(colorLabel)
+        colorContainer.addArrangedSubview(colorCollectionView)
+        
+        vStack.setCustomSpacing(UIConstants.collectionContainerTopSpacing / 2, after: emojiContainer)
+        vStack.addArrangedSubview(colorContainer)
 
         [
             cancelButton,
@@ -294,10 +366,15 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
             scheduleOption.trailingAnchor.constraint(equalTo: optionsContainer.trailingAnchor),
             scheduleOption.bottomAnchor.constraint(equalTo: optionsContainer.bottomAnchor),
             
-            emojiLabel.leadingAnchor.constraint(equalTo: emojiContainer.leadingAnchor, constant: UIConstants.emojiLabelLeading),
+            emojiLabel.leadingAnchor.constraint(equalTo: emojiContainer.leadingAnchor, constant: UIConstants.collectionLabelLeading),
             emojiCollectionView.leadingAnchor.constraint(equalTo: emojiContainer.leadingAnchor),
             emojiCollectionView.trailingAnchor.constraint(equalTo: emojiContainer.trailingAnchor),
-            emojiCollectionView.heightAnchor.constraint(equalToConstant: UIConstants.emojiCollectionViewHeight),
+            emojiCollectionView.heightAnchor.constraint(equalToConstant: UIConstants.collectionViewHeight),
+            
+            colorLabel.leadingAnchor.constraint(equalTo: colorContainer.leadingAnchor, constant: UIConstants.collectionLabelLeading),
+            colorCollectionView.leadingAnchor.constraint(equalTo: colorContainer.leadingAnchor),
+            colorCollectionView.trailingAnchor.constraint(equalTo: colorContainer.trailingAnchor),
+            colorCollectionView.heightAnchor.constraint(equalToConstant: UIConstants.collectionViewHeight),
 
             actionsStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.actionsStackInset),
             actionsStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.actionsStackInset),
@@ -347,8 +424,11 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     }
     
     @objc private func createTapped() {
-        guard let emoji = selectedEmoji else { return }
-        let tracker = Tracker(title: trackerTitle, color: defaultColor, emoji: emoji, schedule: selectedSchedule)
+        guard
+            let emoji = selectedEmoji,
+            let color = selectedColor
+        else { return }
+        let tracker = Tracker(title: trackerTitle, color: color, emoji: emoji, schedule: selectedSchedule)
         delegate?.newTrackerViewController(self, didCreate: tracker, in: defaultCategoryTitle)
         dismiss(animated: true)
     }
@@ -368,6 +448,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         let isValid = !trackerTitle.trimmingCharacters(in: .whitespaces).isEmpty
         && !selectedSchedule.isEmpty
         && selectedEmoji != nil
+        && selectedColor != nil
         
         createButton.isEnabled = isValid
         createButton.backgroundColor = isValid ? .black : .lightGray
@@ -398,28 +479,45 @@ extension NewTrackerViewController: UICollectionViewDataSource {
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        return emojis.count
+        if collectionView == emojiCollectionView {
+            return emojis.count
+        } else if collectionView == colorCollectionView {
+            return colors.count
+        }
+        return 0
     }
     
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: EmojiCell.reuseId,
-            for: indexPath
-        ) as? EmojiCell else {
-            return UICollectionViewCell()
+        if collectionView == emojiCollectionView {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: EmojiCell.reuseId,
+                for: indexPath
+            ) as? EmojiCell else {
+                return UICollectionViewCell()
+            }
+            
+            let emoji = emojis[indexPath.item]
+            cell.configure(with: emoji)
+            cell.backgroundColor = (emoji == selectedEmoji) ? UIColor.systemGray4 : .clear
+            cell.layer.cornerRadius = UIConstants.cornerRadius
+            cell.layer.masksToBounds = true
+            
+            return cell
+        } else {
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: ColorCell.reuseId,
+                for: indexPath
+            ) as? ColorCell else {
+                return UICollectionViewCell()
+            }
+            
+            let color = colors[indexPath.item]
+            cell.configure(with: color, isSelected: color == selectedColor)
+            return cell
         }
-        
-        let emoji = emojis[indexPath.item]
-        cell.configure(with: emoji)
-        
-        cell.backgroundColor = (emoji == selectedEmoji) ? UIColor.systemGray4 : .clear
-        cell.layer.cornerRadius = UIConstants.cornerRadius
-        cell.layer.masksToBounds = true
-        
-        return cell
     }
 }
 
@@ -429,14 +527,34 @@ extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
         _ collectionView: UICollectionView,
         didSelectItemAt indexPath: IndexPath
     ) {
-        let emoji = emojis[indexPath.item]
-        
-        if selectedEmoji == emoji {
-            selectedEmoji = nil
-        } else {
-            selectedEmoji = emoji
+        if collectionView == emojiCollectionView {
+            let emoji = emojis[indexPath.item]
+            selectedEmoji = (selectedEmoji == emoji) ? nil : emoji
+        } else if collectionView == colorCollectionView {
+            let color = colors[indexPath.item]
+            selectedColor = (selectedColor == color) ? nil : color
         }
-        
         collectionView.reloadData()
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        insetForSectionAt section: Int
+    ) -> UIEdgeInsets {
+        return UIEdgeInsets(
+            top: UIConstants.collectionViewVerticalInset,
+            left: 0,
+            bottom: UIConstants.collectionViewVerticalInset,
+            right: 0
+        )
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        return UIConstants.collectionCellSize
     }
 }

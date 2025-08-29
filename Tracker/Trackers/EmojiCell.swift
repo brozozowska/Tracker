@@ -7,7 +7,6 @@
 
 import UIKit
 
-// MARK: - EmojiCell
 final class EmojiCell: UICollectionViewCell {
     
     // MARK: - Constants
