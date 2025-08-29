@@ -32,7 +32,14 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
         static let cornerRadius: CGFloat = 16
         static let vStackSpacing: CGFloat = 24
+        static let vStackTopSpacing: CGFloat = 16
         static let actionsStackSpacing: CGFloat = 8
+        
+        static let emojiCollectionViewHeight: CGFloat = 204
+        static let emojiLabelLeading: CGFloat = 12
+        static let emojiContainerSpacing: CGFloat = 12
+        static let emojiCellSize: CGSize = CGSize(width: 52, height: 52)
+        static let emojiContainerTopSpacing: CGFloat = 32
     }
 
     // MARK: - UI Elements
@@ -83,6 +90,36 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     
     private lazy var scheduleOption = OptionButton()
     
+    private lazy var emojiContainer: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = UIConstants.emojiContainerSpacing
+        stack.alignment = .fill
+        return stack
+    }()
+    
+    private lazy var emojiLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emoji"
+        label.font = .systemFont(ofSize: 19, weight: .bold)
+        label.textColor = .label
+        return label
+    }()
+
+    private lazy var emojiCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.minimumLineSpacing = 0
+        layout.minimumInteritemSpacing = 0
+        let itemSize = UIConstants.emojiCellSize
+        layout.itemSize = itemSize
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.isScrollEnabled = false
+        return collectionView
+    }()
+    
     private lazy var actionsStack: UIStackView = {
         let stack = UIStackView()
         stack.axis = .horizontal
@@ -120,6 +157,16 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     private let defaultColor = UIColor.systemGreen
     private let defaultEmoji = "🔥"
     private var selectedSchedule: [WeekDay] = []
+    private let emojis: [String] = [
+        "🙂","😻","🌺","🐶","❤️","😱",
+        "😇","😡","🥶","🤔","🙌","🍔",
+        "🥦","🏓","🥇","🎸","🏝️","😪"
+    ]
+    private var selectedEmoji: String? {
+        didSet {
+            updateDerivedUI()
+        }
+    }
 
     // MARK: - Initializers
     init() {
@@ -137,6 +184,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         view.backgroundColor = .systemBackground
         scrollView.alwaysBounceVertical = true
 
+        setupEmojiCollectionView()
         setupSubviews()
         setupConstraints()
         setupActions()
@@ -152,6 +200,15 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     }
 
     // MARK: - Setup Layout
+    private func setupEmojiCollectionView() {
+        emojiCollectionView.dataSource = self
+        emojiCollectionView.delegate = self
+        emojiCollectionView.register(
+            EmojiCell.self,
+            forCellWithReuseIdentifier: EmojiCell.reuseId
+        )
+    }
+    
     private func setupSubviews() {
         [
             scrollView,
@@ -184,6 +241,12 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         
         optionsContainer.translatesAutoresizingMaskIntoConstraints = false
         vStack.addArrangedSubview(optionsContainer)
+        
+        emojiContainer.addArrangedSubview(emojiLabel)
+        emojiContainer.addArrangedSubview(emojiCollectionView)
+        
+        vStack.setCustomSpacing(UIConstants.emojiContainerTopSpacing, after: optionsContainer)
+        vStack.addArrangedSubview(emojiContainer)
 
         [
             cancelButton,
@@ -201,13 +264,6 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: actionsStack.topAnchor),
-
-            actionsStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.actionsStackInset),
-            actionsStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.actionsStackInset),
-            actionsStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -UIConstants.actionsStackInset),
-            
-            cancelButton.heightAnchor.constraint(equalToConstant: UIConstants.actionButtonHeight),
-            createButton.heightAnchor.constraint(equalToConstant: UIConstants.actionButtonHeight),
 
             contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
@@ -237,6 +293,18 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
             scheduleOption.leadingAnchor.constraint(equalTo: optionsContainer.leadingAnchor),
             scheduleOption.trailingAnchor.constraint(equalTo: optionsContainer.trailingAnchor),
             scheduleOption.bottomAnchor.constraint(equalTo: optionsContainer.bottomAnchor),
+            
+            emojiLabel.leadingAnchor.constraint(equalTo: emojiContainer.leadingAnchor, constant: UIConstants.emojiLabelLeading),
+            emojiCollectionView.leadingAnchor.constraint(equalTo: emojiContainer.leadingAnchor),
+            emojiCollectionView.trailingAnchor.constraint(equalTo: emojiContainer.trailingAnchor),
+            emojiCollectionView.heightAnchor.constraint(equalToConstant: UIConstants.emojiCollectionViewHeight),
+
+            actionsStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.actionsStackInset),
+            actionsStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.actionsStackInset),
+            actionsStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -UIConstants.actionsStackInset),
+            
+            cancelButton.heightAnchor.constraint(equalToConstant: UIConstants.actionButtonHeight),
+            createButton.heightAnchor.constraint(equalToConstant: UIConstants.actionButtonHeight)
         ])
     }
 
@@ -248,18 +316,6 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         scheduleOption.addTarget(self, action: #selector(scheduleTapped), for: .touchUpInside)
         cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         createButton.addTarget(self, action: #selector(createTapped), for: .touchUpInside)
-    }
-
-    private func updateDerivedUI() {
-        categoryOption.setValue(defaultCategoryTitle)
-        
-        scheduleOption.setValue(
-            selectedSchedule.isEmpty ? nil : selectedSchedule.formattedWeekDay()
-        )
-
-        let isValid = !trackerTitle.trimmingCharacters(in: .whitespaces).isEmpty && !selectedSchedule.isEmpty
-        createButton.isEnabled = isValid
-        createButton.backgroundColor = isValid ? .black : .lightGray
     }
 
     @objc private func nameChanged(_ sender: UITextField) {
@@ -291,9 +347,30 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     }
     
     @objc private func createTapped() {
-        let tracker = Tracker(title: trackerTitle, color: defaultColor, emoji: defaultEmoji, schedule: selectedSchedule)
+        guard let emoji = selectedEmoji else { return }
+        let tracker = Tracker(title: trackerTitle, color: defaultColor, emoji: emoji, schedule: selectedSchedule)
         delegate?.newTrackerViewController(self, didCreate: tracker, in: defaultCategoryTitle)
         dismiss(animated: true)
+    }
+    
+    // MARK: - Private Method
+    private func updateDerivedUI() {
+        categoryOption.setValue(defaultCategoryTitle)
+        
+        scheduleOption.setValue(
+            selectedSchedule.isEmpty ? nil : selectedSchedule.formattedWeekDay()
+        )
+
+        updateCreateButtonState()
+    }
+    
+    private func updateCreateButtonState() {
+        let isValid = !trackerTitle.trimmingCharacters(in: .whitespaces).isEmpty
+        && !selectedSchedule.isEmpty
+        && selectedEmoji != nil
+        
+        createButton.isEnabled = isValid
+        createButton.backgroundColor = isValid ? .black : .lightGray
     }
     
     // MARK: - NewScheduleViewControllerDelegate
@@ -312,5 +389,54 @@ extension NewTrackerViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+extension NewTrackerViewController: UICollectionViewDataSource {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        numberOfItemsInSection section: Int
+    ) -> Int {
+        return emojis.count
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: EmojiCell.reuseId,
+            for: indexPath
+        ) as? EmojiCell else {
+            return UICollectionViewCell()
+        }
+        
+        let emoji = emojis[indexPath.item]
+        cell.configure(with: emoji)
+        
+        cell.backgroundColor = (emoji == selectedEmoji) ? UIColor.systemGray4 : .clear
+        cell.layer.cornerRadius = UIConstants.cornerRadius
+        cell.layer.masksToBounds = true
+        
+        return cell
+    }
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didSelectItemAt indexPath: IndexPath
+    ) {
+        let emoji = emojis[indexPath.item]
+        
+        if selectedEmoji == emoji {
+            selectedEmoji = nil
+        } else {
+            selectedEmoji = emoji
+        }
+        
+        collectionView.reloadData()
     }
 }
