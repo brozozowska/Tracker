@@ -225,6 +225,8 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
             updateDerivedUI()
         }
     }
+    
+    private let categoryStore = TrackerCategoryStore()
 
     // MARK: - Initializers
     init() {
@@ -428,9 +430,22 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
             let emoji = selectedEmoji,
             let color = selectedColor
         else { return }
+        
         let tracker = Tracker(title: trackerTitle, color: color, emoji: emoji, schedule: selectedSchedule)
-        delegate?.newTrackerViewController(self, didCreate: tracker, in: defaultCategoryTitle)
-        dismiss(animated: true)
+        let categoryTitle = defaultCategoryTitle
+        
+        do {
+            var category = categoryStore.category(withTitle: categoryTitle) ?? TrackerCategory(title: categoryTitle, trackers: [])
+            category.trackers.append(tracker)
+            
+            try categoryStore.addNewCategory(category)
+            
+            delegate?.newTrackerViewController(self, didCreate: tracker, in: categoryTitle)
+            dismiss(animated: true)
+            
+        } catch {
+            print("Ошибка сохранения трекера: \(error)")
+        }
     }
     
     // MARK: - Private Method

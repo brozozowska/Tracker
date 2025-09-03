@@ -55,6 +55,12 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     private var visibleCategories: [TrackerCategory] = []
     
+    private let trackerStore = TrackerStore()
+    private let categoryStore = TrackerCategoryStore()
+    private let recordStore = TrackerRecordStore()
+    
+    private var trackers: [Tracker] = []
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,6 +71,14 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         setupCollectionView()
         addSubviews()
         setupLayout()
+        
+        trackerStore.delegate = self
+        categoryStore.delegate = self
+        recordStore.delegate = self
+        
+        trackers = trackerStore.fetchTrackers()
+        categories = categoryStore.fetchCategories()
+        completedTrackers = recordStore.fetchRecords()
         
         updateVisibleTrackers()
     }
@@ -155,9 +169,11 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     // MARK: - Private Methods
     private func updateVisibleTrackers() {
         let currentWeekDay = weekDay(for: selectedDate)
-        visibleCategories = categories.compactMap { category in
-            let trackers = category.trackers.filter { $0.schedule.contains(currentWeekDay) }
-            return trackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: trackers)
+        let grouped = Dictionary(grouping: categories, by: { $0.title })
+        visibleCategories = grouped.compactMap { (title, categoriesGroup) in
+            let trackers = categoriesGroup.flatMap { $0.trackers }
+                .filter { $0.schedule.contains(currentWeekDay) }
+            return trackers.isEmpty ? nil : TrackerCategory(title: title, trackers: trackers)
         }
         collectionView.reloadData()
         updateEmptyStateVisibility()
@@ -171,12 +187,18 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     private func toggleTrackerCompletion(_ tracker: Tracker) {
         if selectedDate > Date() { return }
-                
-        if let index = completedTrackers.firstIndex(where: { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }) {
-            completedTrackers.remove(at: index)
+        
+        if let record = recordStore.record(for: tracker.id, on: selectedDate) {
+            try? recordStore.deleteRecord(record)
+            completedTrackers.removeAll { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
         } else {
-            let record = TrackerRecord(trackerId: tracker.id, date: selectedDate)
-            completedTrackers.append(record)
+            let newRecord = TrackerRecord(trackerId: tracker.id, date: Calendar.current.startOfDay(for: selectedDate))
+            do {
+                try recordStore.addRecord(newRecord)
+            } catch {
+                print("Ошибка сохранения записи:", error)
+            }
+            completedTrackers.append(newRecord)
         }
         
         for (sectionIndex, category) in visibleCategories.enumerated() {
@@ -293,5 +315,29 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         referenceSizeForHeaderInSection section: Int
     ) -> CGSize {
         return CGSize(width: collectionView.bounds.width, height: 30)
+    }
+}
+
+// MARK: - TrackerStoreDelegate
+extension TrackersViewController: TrackerStoreDelegate {
+    func storeDidUpdate(_ trackers: [Tracker]) {
+        self.trackers = trackers
+        updateVisibleTrackers()
+    }
+}
+
+// MARK: - TrackerCategoryStoreDelegate
+extension TrackersViewController: TrackerCategoryStoreDelegate {
+    func storeDidUpdate(_ categories: [TrackerCategory]) {
+        self.categories = categories
+        updateVisibleTrackers()
+    }
+}
+
+// MARK: - TrackerRecordStoreDelegate
+extension TrackersViewController: TrackerRecordStoreDelegate {
+    func storeDidUpdate(_ records: [TrackerRecord]) {
+        self.completedTrackers = records
+        updateVisibleTrackers()
     }
 }
