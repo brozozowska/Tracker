@@ -13,6 +13,11 @@ protocol TrackerRecordStoreDelegate: AnyObject {
     func storeDidUpdate(_ records: [TrackerRecord])
 }
 
+// MARK: - Error
+enum TrackerRecordStoreError: Error {
+    case trackerNotFound(UUID)
+}
+
 // MARK: - TrackerRecordStore
 final class TrackerRecordStore: NSObject {
     
@@ -30,7 +35,13 @@ final class TrackerRecordStore: NSObject {
             cacheName: nil
         )
         fetchedResultsController.delegate = self
-        try? fetchedResultsController.performFetch()
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("❌ Не удалось выполнить выборку записей: \(error.localizedDescription)")
+        }
+        
         return fetchedResultsController
     }()
     
@@ -51,8 +62,14 @@ final class TrackerRecordStore: NSObject {
     // MARK: - Methods
     func fetchRecords() -> [TrackerRecord] {
         let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
-        guard let objects = try? context.fetch(request) else { return [] }
-        return objects.compactMap { self.mapToRecord($0) }
+       
+        do {
+            let objects = try context.fetch(request)
+            return objects.compactMap { self.mapToRecord($0) }
+        } catch {
+            print("❌ Не удалось выполнить выборку записей: \(error.localizedDescription)")
+            return []
+        }
     }
     
     func record(for trackerId: UUID, on date: Date) -> TrackerRecord? {
@@ -68,8 +85,14 @@ final class TrackerRecordStore: NSObject {
         
         request.fetchLimit = 1
         
-        guard let result = try? context.fetch(request).first else { return nil }
-        return mapToRecord(result)
+        do {
+            if let result = try context.fetch(request).first {
+                return mapToRecord(result)
+            }
+        } catch {
+            print("❌ Не удалось выполнить поиск записи трекера \(trackerId) за \(startOfDay): \(error.localizedDescription)")
+        }
+        return nil
     }
     
     func addRecord(_ record: TrackerRecord) throws {
@@ -78,19 +101,23 @@ final class TrackerRecordStore: NSObject {
         let trackerRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         trackerRequest.predicate = NSPredicate(format: "id == %@", record.trackerId as CVarArg)
         
-        guard let trackerObject = try context.fetch(trackerRequest).first
-        else { fatalError("Трекер не найден в БД") }
-        
-        entity.trackerId = record.trackerId
-        entity.date = record.date
-        entity.tracker = trackerObject
-        
-        try context.save()
+        do {
+            guard let trackerObject = try context.fetch(trackerRequest).first else {
+                print("❌ Трекер с id=\(record.trackerId) не найден в БД")
+                throw TrackerRecordStoreError.trackerNotFound(record.trackerId)
+            }
+            entity.trackerId = record.trackerId
+            entity.date = record.date
+            entity.tracker = trackerObject
+            try context.save()
+        } catch {
+            print("❌ Не удалось сохранить запись трекера \(record.trackerId) за \(record.date): \(error.localizedDescription)")
+            throw error
+        }
     }
     
     func deleteRecord(_ record: TrackerRecord) throws {
         let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
-        
         let startOfDay = Calendar.current.startOfDay(for: record.date)
 
         request.predicate = NSPredicate(
@@ -99,9 +126,14 @@ final class TrackerRecordStore: NSObject {
             startOfDay as CVarArg
         )
         
-        if let objectToDelete = try context.fetch(request).first {
-            context.delete(objectToDelete)
-            try context.save()
+        do {
+            if let objectToDelete = try context.fetch(request).first {
+                context.delete(objectToDelete)
+                try context.save()
+            }
+        } catch {
+            print("❌ Не удалось удалить запись трекера \(record.trackerId) за \(startOfDay): \(error.localizedDescription)")
+            throw error
         }
     }
     

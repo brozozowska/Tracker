@@ -189,16 +189,20 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         if selectedDate > Date() { return }
         
         if let record = recordStore.record(for: tracker.id, on: selectedDate) {
-            try? recordStore.deleteRecord(record)
-            completedTrackers.removeAll { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+            do {
+                try recordStore.deleteRecord(record)
+                completedTrackers.removeAll { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+            } catch {
+                print("❌ Не удалось удалить запись трекера \(tracker.id) за \(selectedDate): \(error.localizedDescription)")
+            }
         } else {
             let newRecord = TrackerRecord(trackerId: tracker.id, date: Calendar.current.startOfDay(for: selectedDate))
             do {
                 try recordStore.addRecord(newRecord)
+                completedTrackers.append(newRecord)
             } catch {
-                print("Ошибка сохранения записи:", error)
+                print("❌ Не удалось сохранить новую запись трекера \(tracker.id) за \(selectedDate): \(error.localizedDescription)")
             }
-            completedTrackers.append(newRecord)
         }
         
         for (sectionIndex, category) in visibleCategories.enumerated() {

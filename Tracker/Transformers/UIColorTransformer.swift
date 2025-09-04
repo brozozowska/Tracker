@@ -16,7 +16,13 @@ final class UIColorTransformer: ValueTransformer {
     
     override func transformedValue(_ value: Any?) -> Any? {
         guard let color = value as? UIColor else { return nil }
-        return try? NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false)
+        do {
+            let data = try NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false)
+            return data
+        } catch {
+            print("❌ Не удалось закодировать UIColor: \(error.localizedDescription)")
+            return nil
+        }
     }
     
     override func reverseTransformedValue(_ value: Any?) -> Any? {
@@ -24,7 +30,7 @@ final class UIColorTransformer: ValueTransformer {
         do {
             return try NSKeyedUnarchiver.unarchivedObject(ofClass: UIColor.self, from: data)
         } catch {
-            print("Failed to decode UIColor: \(error)")
+            print("❌ Не удалось раскодировать UIColor: \(error.localizedDescription)")
             return nil
         }
     }

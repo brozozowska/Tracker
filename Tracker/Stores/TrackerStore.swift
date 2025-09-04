@@ -30,7 +30,13 @@ final class TrackerStore: NSObject {
             cacheName: nil
         )
         fetchedResultsController.delegate = self
-        try? fetchedResultsController.performFetch()
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("❌ Не удалось выполнить выборку трекеров: \(error.localizedDescription)")
+        }
+        
         return fetchedResultsController
     }()
     
@@ -61,7 +67,13 @@ final class TrackerStore: NSObject {
         entity.color = tracker.color
         entity.schedule = tracker.schedule as NSObject
         entity.category = category
-        try context.save()
+        
+        do {
+            try context.save()
+        } catch {
+            print("❌ Не удалось сохранить новый трекер '\(tracker.title)': \(error.localizedDescription)")
+            throw error
+        }
     }
     
     // MARK: - Mapping

@@ -30,7 +30,13 @@ final class TrackerCategoryStore: NSObject {
             cacheName: nil
         )
         fetchedResultsController.delegate = self
-        try? fetchedResultsController.performFetch()
+        
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("❌ Не удалось выполнить выборку категорий: \(error.localizedDescription)")
+        }
+        
         return fetchedResultsController
     }()
     
@@ -50,15 +56,27 @@ final class TrackerCategoryStore: NSObject {
     // MARK: - Methods
     func fetchCategories() -> [TrackerCategory] {
         let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        guard let objects = try? context.fetch(request) else { return [] }
-        return objects.compactMap { self.mapToCategory($0) }
+        
+        do {
+            let objects = try context.fetch(request)
+            return objects.compactMap { self.mapToCategory($0) }
+        } catch {
+            print("❌ Не удалось выполнить выборку категорий: \(error.localizedDescription)")
+            return []
+        }
     }
     
     func addNewCategory(_ category: TrackerCategory) throws {
         let entity = TrackerCategoryCoreData(context: context)
         entity.title = category.title
         entity.trackers = NSSet(array: category.trackers.map { self.mapToCoreData($0) })
-        try context.save()
+        
+        do {
+            try context.save()
+        } catch {
+            print("❌ Не удалось сохранить новую категорию '\(category.title)': \(error.localizedDescription)")
+            throw error
+        }
     }
     
     func category(withTitle title: String) -> TrackerCategory? {
@@ -95,8 +113,12 @@ final class TrackerCategoryStore: NSObject {
         let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
         
-        if let existing = try? context.fetch(request).first {
-            return existing
+        do {
+            if let existing = try context.fetch(request).first {
+                return existing
+            }
+        } catch {
+            print("❌ Не удалось выполнить выборку существующего трекера: \(error.localizedDescription)")
         }
 
         let entity = TrackerCoreData(context: context)
