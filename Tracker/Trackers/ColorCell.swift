@@ -24,6 +24,8 @@ final class ColorCell: UICollectionViewCell {
     // MARK: - Lifecycle
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
+        setupContentView()
         setupSubviews()
         setupConstraints()
     }
@@ -33,6 +35,11 @@ final class ColorCell: UICollectionViewCell {
     }
     
     // MARK: - Setup Methods
+    private func setupContentView() {
+        contentView.layer.cornerRadius = 8
+        contentView.layer.masksToBounds = true
+    }
+    
     private func setupSubviews() {
         contentView.addSubview(colorView)
     }
@@ -49,16 +56,7 @@ final class ColorCell: UICollectionViewCell {
     // MARK: - Public Methods
     func configure(with color: UIColor, isSelected: Bool) {
         colorView.backgroundColor = color
-        
-        contentView.layer.cornerRadius = 8
-        contentView.layer.masksToBounds = true
-        
-        if isSelected {
-            contentView.layer.borderWidth = 3
-            contentView.layer.borderColor = color.withAlphaComponent(0.3).cgColor
-        } else {
-            contentView.layer.borderWidth = 0
-            contentView.layer.borderColor = nil
-        }
+        contentView.layer.borderWidth = isSelected ? 3 : 0
+        contentView.layer.borderColor = isSelected ? color.withAlphaComponent(0.3).cgColor : nil
     }
 }

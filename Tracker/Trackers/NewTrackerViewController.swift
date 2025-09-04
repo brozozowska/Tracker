@@ -494,19 +494,22 @@ extension NewTrackerViewController: UICollectionViewDataSource {
         _ collectionView: UICollectionView,
         numberOfItemsInSection section: Int
     ) -> Int {
-        if collectionView == emojiCollectionView {
+        switch collectionView {
+        case emojiCollectionView:
             return emojis.count
-        } else if collectionView == colorCollectionView {
+        case colorCollectionView:
             return colors.count
+        default:
+            return 0
         }
-        return 0
     }
     
     func collectionView(
         _ collectionView: UICollectionView,
         cellForItemAt indexPath: IndexPath
     ) -> UICollectionViewCell {
-        if collectionView == emojiCollectionView {
+        switch collectionView {
+        case emojiCollectionView:
             guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: EmojiCell.reuseId,
                 for: indexPath
@@ -521,7 +524,8 @@ extension NewTrackerViewController: UICollectionViewDataSource {
             cell.layer.masksToBounds = true
             
             return cell
-        } else {
+            
+        case colorCollectionView:
             guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: ColorCell.reuseId,
                 for: indexPath
@@ -532,6 +536,9 @@ extension NewTrackerViewController: UICollectionViewDataSource {
             let color = colors[indexPath.item]
             cell.configure(with: color, isSelected: color == selectedColor)
             return cell
+        
+        default:
+            return UICollectionViewCell()
         }
     }
 }
@@ -542,12 +549,15 @@ extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
         _ collectionView: UICollectionView,
         didSelectItemAt indexPath: IndexPath
     ) {
-        if collectionView == emojiCollectionView {
+        switch collectionView {
+        case emojiCollectionView:
             let emoji = emojis[indexPath.item]
             selectedEmoji = (selectedEmoji == emoji) ? nil : emoji
-        } else if collectionView == colorCollectionView {
+        case colorCollectionView:
             let color = colors[indexPath.item]
             selectedColor = (selectedColor == color) ? nil : color
+        default:
+            break
         }
         collectionView.reloadData()
     }
