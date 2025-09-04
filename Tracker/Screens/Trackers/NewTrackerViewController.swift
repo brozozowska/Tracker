@@ -582,4 +582,16 @@ extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
     ) -> CGSize {
         return UIConstants.collectionCellSize
     }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingForSectionAt section: Int
+    ) -> CGFloat {
+        let numberOfItemsPerRow: CGFloat = 6
+        let totalCellWidth = numberOfItemsPerRow * UIConstants.collectionCellSize.width
+        let totalSpacing = collectionView.bounds.width - totalCellWidth
+        let spacing = totalSpacing / (numberOfItemsPerRow - 1)
+        return max(spacing, 0)
+    }
 }
