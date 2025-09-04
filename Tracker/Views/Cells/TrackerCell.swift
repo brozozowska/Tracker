@@ -86,6 +86,9 @@ final class TrackerCell: UICollectionViewCell {
     // MARK: - Public Properties
     var buttonTapped: (() -> Void)?
     
+    // MARK: - Private Properties
+    private var trackerColor: UIColor = .systemGreen
+    
     // MARK: - Lifecycle
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -172,18 +175,14 @@ final class TrackerCell: UICollectionViewCell {
         colorView.backgroundColor = color
         emojiLabel.text = emoji
         countLabel.text = "\(completedCount) \(dayWord(for: completedCount))"
+        trackerColor = color
         updateButtonStyle(isCompleted: isCompletedToday)
     }
     
     // MARK: - Private Methods
     private func updateButtonStyle(isCompleted: Bool) {
-        if isCompleted {
-            actionButton.setImage(ActionButtonStyle.checkmark, for: .normal)
-            actionButton.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.3)
-        } else {
-            actionButton.setImage(ActionButtonStyle.plus, for: .normal)
-            actionButton.backgroundColor = UIColor.systemGreen
-        }
+        actionButton.setImage(isCompleted ? ActionButtonStyle.checkmark : ActionButtonStyle.plus, for: .normal)
+        actionButton.backgroundColor = isCompleted ? trackerColor.withAlphaComponent(0.3) : trackerColor
     }
     
     private func dayWord(for count: Int) -> String {

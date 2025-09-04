@@ -17,13 +17,13 @@ struct Tracker {
     init(
         id: UUID = UUID(),
         title: String,
-        color: UIColor,
+        color: NSObject,
         emoji: String,
         schedule: [WeekDay]
     ) {
         self.id = id
         self.title = title
-        self.color = color
+        self.color = (color as? UIColor) ?? .clear
         self.emoji = emoji
         self.schedule = schedule
     }
