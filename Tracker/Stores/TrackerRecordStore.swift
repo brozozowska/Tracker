@@ -5,7 +5,6 @@
 //  Created by Сергей Розов on 31.08.2025.
 //
 
-import UIKit
 import CoreData
 
 // MARK: - Protocol
@@ -50,13 +49,8 @@ final class TrackerRecordStore: NSObject {
 
     
     // MARK: - Initializers
-    init(context: NSManagedObjectContext) {
+    init(context: NSManagedObjectContext = CoreDataManager.shared.viewContext) {
         self.context = context
-    }
-    
-    convenience override init() {
-        let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-        self.init(context: context)
     }
     
     // MARK: - Methods
