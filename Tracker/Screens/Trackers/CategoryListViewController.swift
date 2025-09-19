@@ -67,6 +67,8 @@ final class CategoryListViewController: UIViewController {
         return button
     }()
     
+    private var blurView: UIVisualEffectView?
+    
     // MARK: - Public Properties
     weak var delegate: CategoryListViewControllerDelegate?
     
@@ -143,6 +145,7 @@ final class CategoryListViewController: UIViewController {
         ])
     }
     
+    // MARK: - Private Methods
     private func setupActions() {
         doneButton.addTarget(self, action: #selector(doneTapped), for: .touchUpInside)
     }
@@ -154,6 +157,40 @@ final class CategoryListViewController: UIViewController {
         tableView.isHidden = isEmpty
     }
     
+    private func showBlur(excluding rectInView: CGRect) {
+        let blur = UIVisualEffectView(effect: UIBlurEffect(style: .systemThinMaterial))
+        blur.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(blur)
+        NSLayoutConstraint.activate([
+            blur.topAnchor.constraint(equalTo: view.topAnchor),
+            blur.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            blur.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            blur.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        let path = UIBezierPath(rect: view.bounds)
+        let holePath = UIBezierPath(roundedRect: rectInView, cornerRadius: UIConstants.cornerRadius)
+        path.append(holePath)
+        
+        let maskLayer = CAShapeLayer()
+        maskLayer.fillRule = .evenOdd
+        maskLayer.path = path.cgPath
+        blur.layer.mask = maskLayer
+        
+        blur.alpha = 0
+        UIView.animate(withDuration: 0.15) { blur.alpha = 1 }
+        blurView = blur
+    }
+    private func hideBlur() {
+        guard let blur = blurView else { return }
+        UIView.animate(withDuration: 0.15, animations: {
+            blur.alpha = 0
+        }, completion: { _ in
+            blur.removeFromSuperview()
+        })
+        blurView = nil
+    }
+    
     // MARK: - Actions
     @objc private func doneTapped() {
         let creator = NewCategoryViewController()
@@ -162,7 +199,6 @@ final class CategoryListViewController: UIViewController {
             self.selectedCategory = newTitle
             if self.categories.first(where: { $0.title == newTitle }) == nil {
                 self.categories.append(TrackerCategory(title: newTitle, trackers: []))
-                self.categories.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
             }
             self.tableView.reloadData()
             self.updateEmptyStateVisibility()
@@ -174,15 +210,6 @@ final class CategoryListViewController: UIViewController {
             sheet.detents = [.large()]
         }
         present(nav, animated: true)
-    }
-}
-
-// MARK: - TrackerCategoryStoreDelegate
-extension CategoryListViewController: TrackerCategoryStoreDelegate {
-    func storeDidUpdate(_ categories: [TrackerCategory]) {
-        self.categories = categories
-        tableView.reloadData()
-        updateEmptyStateVisibility()
     }
 }
 
@@ -241,8 +268,73 @@ extension CategoryListViewController: UITableViewDelegate {
         delegate?.newCategoryViewController(self, didSelect: newTitle)
         dismiss(animated: true)
     }
+    
+    func tableView(
+        _ tableView: UITableView,
+        contextMenuConfigurationForRowAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        let rectInTable = tableView.rectForRow(at: indexPath)
+        let rectInView = tableView.convert(rectInTable, to: view)
+        showBlur(excluding: rectInView)
+        let title = categories[indexPath.row].title
+        
+        return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+            guard let self else { return nil }
+            
+            let edit = UIAction(title: "Редактировать") { _ in
+                self.hideBlur()
+                let editor = NewCategoryViewController(initialTitle: title)
+                editor.onFinish = { [weak self] newTitle in
+                    guard let self else { return }
+                    if let idx = self.categories.firstIndex(where: { $0.title == title }) {
+                        self.categories[idx] = TrackerCategory(title: newTitle, trackers: self.categories[idx].trackers)
+                        self.tableView.reloadData()
+                    }
+                }
+                let nav = UINavigationController(rootViewController: editor)
+                nav.modalPresentationStyle = .pageSheet
+                if let sheet = nav.sheetPresentationController { sheet.detents = [.large()] }
+                self.present(nav, animated: true)
+            }
+            
+            let delete = UIAction(title: "Удалить", attributes: .destructive) { _ in
+                self.hideBlur()
+                do {
+                    try self.categoryStore.deleteCategory(withTitle: title)
+                } catch {
+                    print("❌ Ошибка удаления категории '\(title)': \(error.localizedDescription)")
+                }
+                self.categories.removeAll { $0.title == title }
+                self.tableView.reloadData()
+                self.updateEmptyStateVisibility()
+            }
+            
+            return UIMenu(children: [edit, delete])
+        }
+    }
+    
+    func tableView(
+        _ tableView: UITableView,
+        willEndContextMenuInteraction configuration: UIContextMenuConfiguration,
+        animator: UIContextMenuInteractionAnimating?
+    ) {
+        animator?.addCompletion { [weak self] in
+            self?.hideBlur()
+        }
+    }
 }
 
+// MARK: - TrackerCategoryStoreDelegate
+extension CategoryListViewController: TrackerCategoryStoreDelegate {
+    func storeDidUpdate(_ categories: [TrackerCategory]) {
+        self.categories = categories
+        tableView.reloadData()
+        updateEmptyStateVisibility()
+    }
+}
+
+// MARK: - Preview
 #Preview {
     let viewController = CategoryListViewController()
     return viewController

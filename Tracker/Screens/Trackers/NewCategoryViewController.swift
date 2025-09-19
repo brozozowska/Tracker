@@ -9,6 +9,7 @@ import UIKit
 
 final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     
+    // MARK: - Constants
     private enum UIConstants {
         static let horizontalInset: CGFloat = 16
         static let verticalInset: CGFloat = 24
@@ -17,10 +18,7 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
         static let actionButtonHeight: CGFloat = 60
     }
     
-    var onFinish: ((String) -> Void)?
-    
-    private let categoryStore = TrackerCategoryStore()
-    
+    // MARK: - UI Elements
     private lazy var nameContainer: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.systemGray6
@@ -53,19 +51,42 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
         return button
     }()
     
+    // MARK: - Public Properties
+    var onFinish: ((String) -> Void)?
+    
+    // MARK: - Private Properties
+    private let initialTitle: String?
+    private let categoryStore = TrackerCategoryStore()
+    
+    // MARK: - Initializers
+    init(initialTitle: String? = nil) {
+        self.initialTitle = initialTitle
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        navigationItem.title = "Новая категория"
+        navigationItem.title = initialTitle == nil ? "Новая категория" : "Редактирование категории"
         
         setupSubviews()
         setupConstraints()
+        
+        if let initialTitle {
+            nameTextField.text = initialTitle
+            textChanged()
+        }
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
     
+    // MARK: - Setup
     private func setupSubviews() {
         [nameContainer, doneButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
@@ -93,6 +114,7 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
         ])
     }
     
+    // MARK: - Actions
     @objc private func textChanged() {
         let trimmed = (nameTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let enabled = !trimmed.isEmpty
@@ -109,16 +131,21 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
         guard !trimmed.isEmpty else { return }
         
         do {
-            let category = TrackerCategory(title: trimmed, trackers: [])
-            try categoryStore.addNewCategory(category)
+            if let old = initialTitle {
+                try categoryStore.updateCategoryTitle(oldTitle: old, newTitle: trimmed)
+            } else {
+                let category = TrackerCategory(title: trimmed, trackers: [])
+                try categoryStore.addNewCategory(category)
+            }
         } catch {
-            print("❌ Не удалось сохранить категорию '\(trimmed)': \(error.localizedDescription)")
+            print("❌ Ошибка сохранения категории '\(trimmed)': \(error.localizedDescription)")
         }
         
         onFinish?(trimmed)
         dismiss(animated: true)
     }
     
+    // MARK: - UITextFieldDelegate
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         doneTapped()
         return true

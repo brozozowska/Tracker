@@ -77,6 +77,36 @@ final class TrackerCategoryStore: NSObject {
         return fetchCategories().first { $0.title == title }
     }
     
+    func updateCategoryTitle(oldTitle: String, newTitle: String) throws {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "title == %@", oldTitle)
+        request.fetchLimit = 1
+        do {
+            if let object = try context.fetch(request).first {
+                object.title = newTitle
+                try context.save()
+            }
+        } catch {
+            print("❌ Не удалось обновить категорию '\(oldTitle)' -> '\(newTitle)': \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func deleteCategory(withTitle title: String) throws {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "title == %@", title)
+        do {
+            let objects = try context.fetch(request)
+            for object in objects {
+                context.delete(object)
+            }
+            try context.save()
+        } catch {
+            print("❌ Не удалось удалить категорию '\(title)': \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
     // MARK: - Mapping
     private func mapToCategory(_ object: TrackerCategoryCoreData) -> TrackerCategory? {
         guard let title = object.title else { return nil }
