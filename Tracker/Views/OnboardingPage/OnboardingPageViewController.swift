@@ -64,9 +64,9 @@ final class OnboardingPageViewController: UIViewController {
             backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            label.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -320),
             label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            label.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -295)
         ])
     }
 }
