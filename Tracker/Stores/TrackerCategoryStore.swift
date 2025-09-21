@@ -61,20 +61,66 @@ final class TrackerCategoryStore: NSObject {
     }
     
     func addNewCategory(_ category: TrackerCategory) throws {
-        let entity = TrackerCategoryCoreData(context: context)
-        entity.title = category.title
-        entity.trackers = NSSet(array: category.trackers.map { self.mapToCoreData($0) })
+        if let existing = fetchCategoryObject(withTitle: category.title) {
+            let existingTrackers = (existing.trackers as? Set<TrackerCoreData>) ?? []
+            var resultSet = existingTrackers
+            for tracker in category.trackers {
+                let core = mapToCoreData(tracker)
+                resultSet.insert(core)
+                core.category = existing
+            }
+            existing.trackers = NSSet(set: resultSet)
+        } else {
+            let entity = TrackerCategoryCoreData(context: context)
+            entity.title = category.title
+            let mapped = category.trackers.map { self.mapToCoreData($0) }
+            mapped.forEach { $0.category = entity }
+            entity.trackers = NSSet(array: mapped)
+        }
         
         do {
             try context.save()
         } catch {
-            print("❌ Не удалось сохранить новую категорию '\(category.title)': \(error.localizedDescription)")
+            print("❌ Не удалось сохранить категорию '\(category.title)': \(error.localizedDescription)")
             throw error
         }
     }
     
     func category(withTitle title: String) -> TrackerCategory? {
         return fetchCategories().first { $0.title == title }
+    }
+    
+    func fetchCategoryObject(withTitle title: String) -> TrackerCategoryCoreData? {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "title == %@", title)
+        request.fetchLimit = 1
+        do {
+            return try context.fetch(request).first
+        } catch {
+            print("❌ Не удалось найти категорию '\(title)': \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    func addTracker(_ tracker: Tracker, toCategoryWithTitle title: String) throws {
+        let categoryObject: TrackerCategoryCoreData
+        if let existing = fetchCategoryObject(withTitle: title) {
+            categoryObject = existing
+        } else {
+            let newCategory = TrackerCategoryCoreData(context: context)
+            newCategory.title = title
+            categoryObject = newCategory
+        }
+        
+        let trackerObject = mapToCoreData(tracker)
+        trackerObject.category = categoryObject
+        
+        do {
+            try context.save()
+        } catch {
+            print("❌ Не удалось добавить трекер '\(tracker.title)' в категорию '\(title)': \(error.localizedDescription)")
+            throw error
+        }
     }
     
     func updateCategoryTitle(oldTitle: String, newTitle: String) throws {
@@ -139,6 +185,10 @@ final class TrackerCategoryStore: NSObject {
         
         do {
             if let existing = try context.fetch(request).first {
+                existing.title = tracker.title
+                existing.emoji = tracker.emoji
+                existing.color = tracker.color
+                existing.schedule = tracker.schedule as NSObject
                 return existing
             }
         } catch {

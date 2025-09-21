@@ -446,14 +446,9 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         let categoryTitle = selectedCategory.isEmpty ? defaultCategoryTitle : selectedCategory
         
         do {
-            var category = categoryStore.category(withTitle: categoryTitle) ?? TrackerCategory(title: categoryTitle, trackers: [])
-            category.trackers.append(tracker)
-            
-            try categoryStore.addNewCategory(category)
-            
+            try categoryStore.addTracker(tracker, toCategoryWithTitle: categoryTitle)
             delegate?.newTrackerViewController(self, didCreate: tracker, in: categoryTitle)
             dismiss(animated: true)
-            
         } catch {
             print("Ошибка сохранения трекера: \(error)")
         }
