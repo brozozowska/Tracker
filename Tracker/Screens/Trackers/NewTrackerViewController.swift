@@ -447,7 +447,6 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         
         do {
             try categoryStore.addTracker(tracker, toCategoryWithTitle: categoryTitle)
-            delegate?.newTrackerViewController(self, didCreate: tracker, in: categoryTitle)
             dismiss(animated: true)
         } catch {
             print("Ошибка сохранения трекера: \(error)")
@@ -482,7 +481,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     ) {
         self.selectedSchedule = schedule
         updateDerivedUI()
-        navigationController?.popViewController(animated: true)
+        viewController.dismiss(animated: true)
     }
     
     // MARK: - CategoryListViewControllerDelegate
@@ -492,6 +491,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     ) {
         self.selectedCategory = category
         updateDerivedUI()
+        viewController.dismiss(animated: true)
     }
 }
 

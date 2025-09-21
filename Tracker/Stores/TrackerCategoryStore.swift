@@ -49,15 +49,10 @@ final class TrackerCategoryStore: NSObject {
 
     // MARK: - Methods
     func fetchCategories() -> [TrackerCategory] {
-        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        
-        do {
-            let objects = try context.fetch(request)
-            return objects.compactMap { self.mapToCategory($0) }
-        } catch {
-            print("❌ Не удалось выполнить выборку категорий: \(error.localizedDescription)")
+        guard let objects = fetchedResultsController.fetchedObjects else {
             return []
         }
+        return objects.compactMap { self.mapToCategory($0) }
     }
     
     func addNewCategory(_ category: TrackerCategory) throws {
@@ -157,7 +152,8 @@ final class TrackerCategoryStore: NSObject {
     private func mapToCategory(_ object: TrackerCategoryCoreData) -> TrackerCategory? {
         guard let title = object.title else { return nil }
         let trackers = (object.trackers as? Set<TrackerCoreData>)?
-            .compactMap { self.mapToTracker($0) } ?? []
+            .compactMap { self.mapToTracker($0) }
+            .sorted { $0.title < $1.title } ?? []
         return TrackerCategory(title: title, trackers: trackers)
     }
     
@@ -214,6 +210,10 @@ extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
         for type: NSFetchedResultsChangeType,
         newIndexPath: IndexPath?
     ) {
+        delegate?.storeDidUpdate(fetchCategories())
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.storeDidUpdate(fetchCategories())
     }
 }

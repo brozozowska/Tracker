@@ -169,14 +169,15 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     // MARK: - Private Methods
     private func updateVisibleTrackers() {
         let currentWeekDay = weekDay(for: selectedDate)
-        let grouped = Dictionary(grouping: categories, by: { $0.title })
-        visibleCategories = grouped.compactMap { (title, categoriesGroup) in
-            let trackers = categoriesGroup.flatMap { $0.trackers }
-                .filter { $0.schedule.contains(currentWeekDay) }
-            return trackers.isEmpty ? nil : TrackerCategory(title: title, trackers: trackers)
+        
+        visibleCategories = categories.compactMap { category in
+            let filteredTrackers = category.trackers.filter { $0.schedule.contains(currentWeekDay) }
+            guard !filteredTrackers.isEmpty else { return nil }
+            return TrackerCategory(title: category.title, trackers: filteredTrackers)
         }
-        collectionView.reloadData()
+        
         updateEmptyStateVisibility()
+        collectionView.reloadData()
     }
     
     private func updateEmptyStateVisibility() {
@@ -186,37 +187,46 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     }
     
     private func toggleTrackerCompletion(_ tracker: Tracker) {
-        if selectedDate > Date() { return }
-        
-        if let record = recordStore.record(for: tracker.id, on: selectedDate) {
-            do {
-                try recordStore.deleteRecord(record)
+        guard selectedDate <= Date() else { return }
+
+            if let record = recordStore.record(for: tracker.id, on: selectedDate) {
+                try? recordStore.deleteRecord(record)
                 completedTrackers.removeAll { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
-            } catch {
-                print("❌ Не удалось удалить запись трекера \(tracker.id) за \(selectedDate): \(error.localizedDescription)")
-            }
-        } else {
-            let newRecord = TrackerRecord(trackerId: tracker.id, date: Calendar.current.startOfDay(for: selectedDate))
-            do {
-                try recordStore.addRecord(newRecord)
+            } else {
+                let newRecord = TrackerRecord(trackerId: tracker.id, date: Calendar.current.startOfDay(for: selectedDate))
+                try? recordStore.addRecord(newRecord)
                 completedTrackers.append(newRecord)
-            } catch {
-                print("❌ Не удалось сохранить новую запись трекера \(tracker.id) за \(selectedDate): \(error.localizedDescription)")
             }
-        }
-        
-        for (sectionIndex, category) in visibleCategories.enumerated() {
-            if let itemIndex = category.trackers.firstIndex(where: { $0.id == tracker.id }) {
-                collectionView.reloadItems(at: [IndexPath(item: itemIndex, section: sectionIndex)])
-                break
+
+            for (sectionIndex, category) in visibleCategories.enumerated() {
+                if let itemIndex = category.trackers.firstIndex(where: { $0.id == tracker.id }) {
+                    let indexPath = IndexPath(item: itemIndex, section: sectionIndex)
+                    collectionView.reloadItems(at: [indexPath])
+                    break
+                }
             }
-        }
     }
     
     private func weekDay(for date: Date) -> WeekDay {
         let calendar = Calendar.current
         let weekdayIndex = (calendar.component(.weekday, from: date) + 5) % 7
         return WeekDay.allCases[weekdayIndex]
+    }
+    
+    private func presentDeleteTrackerConfirmation(for trackerId: UUID) {
+        BottomConfirmViewController.present(
+            from: self,
+            message: "Уверены, что хотите удалить трекер?",
+            onConfirm: { [weak self] in
+                guard let self else { return }
+                do {
+                    try self.trackerStore.deleteTracker(id: trackerId)
+                } catch {
+                    print("❌ Ошибка удаления трекера id=\(trackerId): \(error.localizedDescription)")
+                }
+            },
+            onCancel: nil
+        )
     }
     
     // MARK: - NewTrackerViewControllerDelegate
@@ -299,6 +309,21 @@ extension TrackersViewController: UICollectionViewDataSource {
         let category = visibleCategories[indexPath.section]
         header.configure(title: category.title)
         return header
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemAt indexPath: IndexPath,
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
+        return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
+            guard let self else { return nil }
+            let delete = UIAction(title: "Удалить", attributes: .destructive) { _ in
+                self.presentDeleteTrackerConfirmation(for: tracker.id)
+            }
+            return UIMenu(children: [delete])
+        }
     }
 }
 

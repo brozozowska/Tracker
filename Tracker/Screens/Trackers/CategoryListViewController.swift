@@ -195,21 +195,17 @@ final class CategoryListViewController: UIViewController {
     @objc private func doneTapped() {
         let creator = NewCategoryViewController()
         creator.onFinish = { [weak self] newTitle in
-            guard let self = self else { return }
-            self.selectedCategory = newTitle
-            if self.categories.first(where: { $0.title == newTitle }) == nil {
-                self.categories.append(TrackerCategory(title: newTitle, trackers: []))
+            guard let self else { return }
+            do {
+                try self.categoryStore.addNewCategory(
+                    TrackerCategory(title: newTitle, trackers: [])
+                )
+            } catch {
+                print("Ошибка добавления категории: \(error)")
             }
-            self.tableView.reloadData()
-            self.updateEmptyStateVisibility()
-            self.delegate?.newCategoryViewController(self, didSelect: newTitle)
         }
-        let nav = UINavigationController(rootViewController: creator)
-        nav.modalPresentationStyle = .pageSheet
-        if let sheet = nav.sheetPresentationController {
-            sheet.detents = [.large()]
-        }
-        present(nav, animated: true)
+        let navVC = UINavigationController(rootViewController: creator)
+        present(navVC, animated: true)
     }
 }
 
@@ -287,9 +283,13 @@ extension CategoryListViewController: UITableViewDelegate {
                 let editor = NewCategoryViewController(initialTitle: title)
                 editor.onFinish = { [weak self] newTitle in
                     guard let self else { return }
-                    if let idx = self.categories.firstIndex(where: { $0.title == title }) {
-                        self.categories[idx] = TrackerCategory(title: newTitle, trackers: self.categories[idx].trackers)
-                        self.tableView.reloadData()
+                    do {
+                        try self.categoryStore.updateCategoryTitle(
+                            oldTitle: title,
+                            newTitle: newTitle
+                        )
+                    } catch {
+                        print("Ошибка обновления категории: \(error)")
                     }
                 }
                 let nav = UINavigationController(rootViewController: editor)
@@ -311,9 +311,6 @@ extension CategoryListViewController: UITableViewDelegate {
                         } catch {
                             print("❌ Ошибка удаления категории '\(title)': \(error.localizedDescription)")
                         }
-                        self.categories.removeAll { $0.title == title }
-                        self.tableView.reloadData()
-                        self.updateEmptyStateVisibility()
                     },
                     onCancel: { [weak self] in
                         self?.hideBlur()
