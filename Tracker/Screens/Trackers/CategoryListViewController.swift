@@ -300,14 +300,25 @@ extension CategoryListViewController: UITableViewDelegate {
             
             let delete = UIAction(title: "Удалить", attributes: .destructive) { _ in
                 self.hideBlur()
-                do {
-                    try self.categoryStore.deleteCategory(withTitle: title)
-                } catch {
-                    print("❌ Ошибка удаления категории '\(title)': \(error.localizedDescription)")
-                }
-                self.categories.removeAll { $0.title == title }
-                self.tableView.reloadData()
-                self.updateEmptyStateVisibility()
+                
+                BottomConfirmViewController.present(
+                    from: self,
+                    message: "Эта категория точно не нужна?",
+                    onConfirm: { [weak self] in
+                        guard let self else { return }
+                        do {
+                            try self.categoryStore.deleteCategory(withTitle: title)
+                        } catch {
+                            print("❌ Ошибка удаления категории '\(title)': \(error.localizedDescription)")
+                        }
+                        self.categories.removeAll { $0.title == title }
+                        self.tableView.reloadData()
+                        self.updateEmptyStateVisibility()
+                    },
+                    onCancel: { [weak self] in
+                        self?.hideBlur()
+                    }
+                )
             }
             
             return UIMenu(children: [edit, delete])
