@@ -91,6 +91,7 @@ final class OnboardingViewController: UIPageViewController {
     
     // MARK: - Actions
     @objc private func didTapActionButton() {
+        UserDefaults.standard.hasCompletedOnboarding = true
         let trackersVC = TabBarController()
         trackersVC.modalPresentationStyle = .fullScreen
         present(trackersVC, animated: true)
