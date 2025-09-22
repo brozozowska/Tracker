@@ -181,7 +181,6 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     weak var delegate: NewTrackerViewControllerDelegate?
 
     // MARK: - Private Properties
-    private let defaultCategoryTitle = "Важное"
     private var trackerTitle: String = ""
     private var selectedSchedule: [WeekDay] = []
     private var selectedCategory: String = ""
@@ -227,10 +226,11 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         }
     }
     
-    private let categoryStore = TrackerCategoryStore()
+    private let categoryStore: TrackerCategoryStore
 
     // MARK: - Initializers
-    init() {
+    init(categoryStore: TrackerCategoryStore) {
+        self.categoryStore = categoryStore
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -443,11 +443,18 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         else { return }
         
         let tracker = Tracker(title: trackerTitle, color: color, emoji: emoji, schedule: selectedSchedule)
-        let categoryTitle = selectedCategory.isEmpty ? defaultCategoryTitle : selectedCategory
+        let categoryTitle = selectedCategory
         
         do {
             try categoryStore.addTracker(tracker, toCategoryWithTitle: categoryTitle)
-            dismiss(animated: true)
+            
+            delegate?.newTrackerViewController(
+                self,
+                didCreate: tracker,
+                in: categoryTitle
+            )
+            
+            presentingViewController?.dismiss(animated: true)
         } catch {
             print("Ошибка сохранения трекера: \(error)")
         }
@@ -466,6 +473,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     
     private func updateCreateButtonState() {
         let isValid = !trackerTitle.trimmingCharacters(in: .whitespaces).isEmpty
+        && !selectedCategory.isEmpty
         && !selectedSchedule.isEmpty
         && selectedEmoji != nil
         && selectedColor != nil

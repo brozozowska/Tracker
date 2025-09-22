@@ -73,13 +73,11 @@ final class CategoryListViewController: UIViewController {
     weak var delegate: CategoryListViewControllerDelegate?
     
     // MARK: - Private Properties
-    private let categoryStore = TrackerCategoryStore()
-    private var categories: [TrackerCategory] = []
-    private var selectedCategory: String?
+    private let viewModel: CategoryListViewModel
     
     // MARK: - Initializers
-    init(selectedCategory: String? = nil) {
-        self.selectedCategory = selectedCategory
+    init(selectedCategory: String? = nil, store: TrackerCategoryStore = TrackerCategoryStore()) {
+        self.viewModel = CategoryListViewModel(store: store, selectedCategory: selectedCategory)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -98,10 +96,8 @@ final class CategoryListViewController: UIViewController {
         setupConstraints()
         setupActions()
         
-        categoryStore.delegate = self
-        categories = categoryStore.fetchCategories()
-        tableView.reloadData()
-        updateEmptyStateVisibility()
+        bindViewModel()
+        viewModel.fetchCategories()
     }
     
     // MARK: - Setup Layout
@@ -145,16 +141,34 @@ final class CategoryListViewController: UIViewController {
         ])
     }
     
+    // MARK: - Bindings
+    private func bindViewModel() {
+        viewModel.onCategoriesChanged = { [weak self] _ in
+            guard let self = self else { return }
+            self.tableView.reloadData()
+            self.refreshSelectionUI()
+        }
+        viewModel.onEmptyStateChanged = { [weak self] isEmpty in
+            guard let self = self else { return }
+            self.emptyStateImageView.isHidden = !isEmpty
+            self.emptyStateLabel.isHidden = !isEmpty
+            self.tableView.isHidden = isEmpty
+        }
+    }
+    
     // MARK: - Private Methods
     private func setupActions() {
         doneButton.addTarget(self, action: #selector(doneTapped), for: .touchUpInside)
     }
     
-    private func updateEmptyStateVisibility() {
-        let isEmpty = categories.isEmpty
-        emptyStateImageView.isHidden = !isEmpty
-        emptyStateLabel.isHidden = !isEmpty
-        tableView.isHidden = isEmpty
+    private func refreshSelectionUI() {
+        for (index, category) in viewModel.categories.enumerated() {
+            let indexPath = IndexPath(row: index, section: 0)
+            if let cell = tableView.cellForRow(at: indexPath) as? CategoryCell {
+                let isSelected = (category.title == viewModel.selectedCategory)
+                cell.setChecked(isSelected)
+            }
+        }
     }
     
     private func showBlur(excluding rectInView: CGRect) {
@@ -196,13 +210,7 @@ final class CategoryListViewController: UIViewController {
         let creator = NewCategoryViewController()
         creator.onFinish = { [weak self] newTitle in
             guard let self else { return }
-            do {
-                try self.categoryStore.addNewCategory(
-                    TrackerCategory(title: newTitle, trackers: [])
-                )
-            } catch {
-                print("Ошибка добавления категории: \(error)")
-            }
+            self.viewModel.addCategory(title: newTitle)
         }
         let navVC = UINavigationController(rootViewController: creator)
         present(navVC, animated: true)
@@ -215,7 +223,7 @@ extension CategoryListViewController: UITableViewDataSource {
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        categories.count
+        viewModel.categories.count
     }
     
     func tableView(
@@ -227,17 +235,15 @@ extension CategoryListViewController: UITableViewDataSource {
             for: indexPath
         ) as? CategoryCell else { return UITableViewCell() }
         
-        let title = categories[indexPath.row].title
-        let isFirst = indexPath.row == 0
-        let isLast = indexPath.row == categories.count - 1
-        let isSelected = (title == selectedCategory)
-        
+        let category = viewModel.categories[indexPath.row]
+        let isSelected = (category.title == viewModel.selectedCategory)
         cell.configure(
-            day: title,
+            day: category.title,
             isSelected: isSelected,
-            isFirst: isFirst,
-            isLast: isLast
+            isFirst: indexPath.row == 0,
+            isLast: indexPath.row == viewModel.categories.count - 1
         )
+        
         cell.selectionStyle = .none
         return cell
     }
@@ -249,8 +255,7 @@ extension CategoryListViewController: UITableViewDelegate {
         _ tableView: UITableView,
         didSelectRowAt indexPath: IndexPath
     ) {
-        let newTitle = categories[indexPath.row].title
-        selectedCategory = newTitle
+        viewModel.selectCategory(at: indexPath.row)
         
         for cell in tableView.visibleCells {
             if let categoryCell = cell as? CategoryCell {
@@ -261,7 +266,7 @@ extension CategoryListViewController: UITableViewDelegate {
             selectedCell.setChecked(true)
         }
         
-        delegate?.newCategoryViewController(self, didSelect: newTitle)
+        delegate?.newCategoryViewController(self, didSelect: viewModel.selectedCategory ?? "")
         dismiss(animated: true)
     }
     
@@ -273,7 +278,7 @@ extension CategoryListViewController: UITableViewDelegate {
         let rectInTable = tableView.rectForRow(at: indexPath)
         let rectInView = tableView.convert(rectInTable, to: view)
         showBlur(excluding: rectInView)
-        let title = categories[indexPath.row].title
+        let title = viewModel.categories[indexPath.row].title
         
         return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             guard let self else { return nil }
@@ -283,14 +288,7 @@ extension CategoryListViewController: UITableViewDelegate {
                 let editor = NewCategoryViewController(initialTitle: title)
                 editor.onFinish = { [weak self] newTitle in
                     guard let self else { return }
-                    do {
-                        try self.categoryStore.updateCategoryTitle(
-                            oldTitle: title,
-                            newTitle: newTitle
-                        )
-                    } catch {
-                        print("Ошибка обновления категории: \(error)")
-                    }
+                    self.viewModel.updateCategory(oldTitle: title, newTitle: newTitle)
                 }
                 let nav = UINavigationController(rootViewController: editor)
                 nav.modalPresentationStyle = .pageSheet
@@ -306,11 +304,8 @@ extension CategoryListViewController: UITableViewDelegate {
                     message: "Эта категория точно не нужна?",
                     onConfirm: { [weak self] in
                         guard let self else { return }
-                        do {
-                            try self.categoryStore.deleteCategory(withTitle: title)
-                        } catch {
-                            print("❌ Ошибка удаления категории '\(title)': \(error.localizedDescription)")
-                        }
+                        let titleToDelete = self.viewModel.categories[indexPath.row].title
+                        self.viewModel.deleteCategory(title: titleToDelete)
                     },
                     onCancel: { [weak self] in
                         self?.hideBlur()
@@ -330,15 +325,6 @@ extension CategoryListViewController: UITableViewDelegate {
         animator?.addCompletion { [weak self] in
             self?.hideBlur()
         }
-    }
-}
-
-// MARK: - TrackerCategoryStoreDelegate
-extension CategoryListViewController: TrackerCategoryStoreDelegate {
-    func storeDidUpdate(_ categories: [TrackerCategory]) {
-        self.categories = categories
-        tableView.reloadData()
-        updateEmptyStateVisibility()
     }
 }
 

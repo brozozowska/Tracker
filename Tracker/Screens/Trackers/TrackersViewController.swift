@@ -85,7 +85,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     // MARK: - Actions
     @objc private func addTrackerTapped() {        
-        let creator = NewTrackerViewController()
+        let creator = NewTrackerViewController(categoryStore: categoryStore)
         creator.delegate = self
         
         let navigationController = UINavigationController(rootViewController: creator)
@@ -235,16 +235,8 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         didCreate tracker: Tracker,
         in categoryTitle: String
     ) {
-        if let existingIndex = categories.firstIndex(where: { $0.title == categoryTitle }) {
-            categories[existingIndex] = TrackerCategory(
-                title: categories[existingIndex].title,
-                trackers: categories[existingIndex].trackers + [tracker]
-            )
-        } else {
-            let newCategory = TrackerCategory(title: categoryTitle, trackers: [tracker])
-            categories.append(newCategory)
-        }
-        
+        categories = categoryStore.fetchCategories()
+        updateVisibleTrackers()
         collectionView.reloadData()
         updateEmptyStateVisibility()
     }
