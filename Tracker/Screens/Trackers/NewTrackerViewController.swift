@@ -17,7 +17,7 @@ protocol NewTrackerViewControllerDelegate: AnyObject {
 }
 
 // MARK: - NewTrackerViewController
-final class NewTrackerViewController: UIViewController, NewScheduleViewControllerDelegate {
+final class NewTrackerViewController: UIViewController, NewScheduleViewControllerDelegate, CategoryListViewControllerDelegate {
 
     // MARK: - Constants
     private enum UIConstants {
@@ -181,9 +181,9 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     weak var delegate: NewTrackerViewControllerDelegate?
 
     // MARK: - Private Properties
-    private let defaultCategoryTitle = "Важное"
     private var trackerTitle: String = ""
     private var selectedSchedule: [WeekDay] = []
+    private var selectedCategory: String = ""
     
     private let emojis: [String] = [
         "🙂","😻","🌺","🐶","❤️","😱",
@@ -226,10 +226,11 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         }
     }
     
-    private let categoryStore = TrackerCategoryStore()
+    private let categoryStore: TrackerCategoryStore
 
     // MARK: - Initializers
-    init() {
+    init(categoryStore: TrackerCategoryStore) {
+        self.categoryStore = categoryStore
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -406,7 +407,16 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         view.endEditing(true)
     }
 
-    @objc private func categoryTapped() { }
+    @objc private func categoryTapped() {
+        let creator = CategoryListViewController(selectedCategory: selectedCategory.isEmpty ? nil : selectedCategory)
+        creator.delegate = self
+        let navigationController = UINavigationController(rootViewController: creator)
+        navigationController.modalPresentationStyle = .pageSheet
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.large()]
+        }
+        present(navigationController, animated: true)
+    }
     
     @objc private func scheduleTapped() {
         let creator = NewScheduleViewController(selectedDays: selectedSchedule)
@@ -419,7 +429,8 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
             sheet.detents = [.large()]
         }
         
-        present(navigationController, animated: true)    }
+        present(navigationController, animated: true)
+    }
     
     @objc private func cancelTapped() {
         dismiss(animated: true)
@@ -432,17 +443,18 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         else { return }
         
         let tracker = Tracker(title: trackerTitle, color: color, emoji: emoji, schedule: selectedSchedule)
-        let categoryTitle = defaultCategoryTitle
+        let categoryTitle = selectedCategory
         
         do {
-            var category = categoryStore.category(withTitle: categoryTitle) ?? TrackerCategory(title: categoryTitle, trackers: [])
-            category.trackers.append(tracker)
+            try categoryStore.addTracker(tracker, toCategoryWithTitle: categoryTitle)
             
-            try categoryStore.addNewCategory(category)
+            delegate?.newTrackerViewController(
+                self,
+                didCreate: tracker,
+                in: categoryTitle
+            )
             
-            delegate?.newTrackerViewController(self, didCreate: tracker, in: categoryTitle)
-            dismiss(animated: true)
-            
+            presentingViewController?.dismiss(animated: true)
         } catch {
             print("Ошибка сохранения трекера: \(error)")
         }
@@ -450,7 +462,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     
     // MARK: - Private Method
     private func updateDerivedUI() {
-        categoryOption.setValue(defaultCategoryTitle)
+        categoryOption.setValue(selectedCategory.isEmpty ? "" : selectedCategory)
         
         scheduleOption.setValue(
             selectedSchedule.isEmpty ? nil : selectedSchedule.formattedWeekDay()
@@ -461,6 +473,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     
     private func updateCreateButtonState() {
         let isValid = !trackerTitle.trimmingCharacters(in: .whitespaces).isEmpty
+        && !selectedCategory.isEmpty
         && !selectedSchedule.isEmpty
         && selectedEmoji != nil
         && selectedColor != nil
@@ -476,7 +489,17 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     ) {
         self.selectedSchedule = schedule
         updateDerivedUI()
-        navigationController?.popViewController(animated: true)
+        viewController.dismiss(animated: true)
+    }
+    
+    // MARK: - CategoryListViewControllerDelegate
+    func newCategoryViewController(
+        _ viewController: CategoryListViewController,
+        didSelect category: String
+    ) {
+        self.selectedCategory = category
+        updateDerivedUI()
+        viewController.dismiss(animated: true)
     }
 }
 

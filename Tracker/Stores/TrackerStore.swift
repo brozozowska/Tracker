@@ -70,6 +70,21 @@ final class TrackerStore: NSObject {
         }
     }
     
+    func deleteTracker(id: UUID) throws {
+        let request: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.fetchLimit = 1
+        do {
+            if let object = try context.fetch(request).first {
+                context.delete(object)
+                try context.save()
+            }
+        } catch {
+            print("❌ Не удалось удалить трекер id=\(id): \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
     // MARK: - Mapping
     private func mapToTracker(_ object: TrackerCoreData) -> Tracker? {
         guard

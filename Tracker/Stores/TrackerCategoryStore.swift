@@ -49,26 +49,34 @@ final class TrackerCategoryStore: NSObject {
 
     // MARK: - Methods
     func fetchCategories() -> [TrackerCategory] {
-        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        
-        do {
-            let objects = try context.fetch(request)
-            return objects.compactMap { self.mapToCategory($0) }
-        } catch {
-            print("❌ Не удалось выполнить выборку категорий: \(error.localizedDescription)")
+        guard let objects = fetchedResultsController.fetchedObjects else {
             return []
         }
+        return objects.compactMap { self.mapToCategory($0) }
     }
     
     func addNewCategory(_ category: TrackerCategory) throws {
-        let entity = TrackerCategoryCoreData(context: context)
-        entity.title = category.title
-        entity.trackers = NSSet(array: category.trackers.map { self.mapToCoreData($0) })
+        if let existing = fetchCategoryObject(withTitle: category.title) {
+            let existingTrackers = (existing.trackers as? Set<TrackerCoreData>) ?? []
+            var resultSet = existingTrackers
+            for tracker in category.trackers {
+                let core = mapToCoreData(tracker)
+                resultSet.insert(core)
+                core.category = existing
+            }
+            existing.trackers = NSSet(set: resultSet)
+        } else {
+            let entity = TrackerCategoryCoreData(context: context)
+            entity.title = category.title
+            let mapped = category.trackers.map { self.mapToCoreData($0) }
+            mapped.forEach { $0.category = entity }
+            entity.trackers = NSSet(array: mapped)
+        }
         
         do {
             try context.save()
         } catch {
-            print("❌ Не удалось сохранить новую категорию '\(category.title)': \(error.localizedDescription)")
+            print("❌ Не удалось сохранить категорию '\(category.title)': \(error.localizedDescription)")
             throw error
         }
     }
@@ -77,11 +85,75 @@ final class TrackerCategoryStore: NSObject {
         return fetchCategories().first { $0.title == title }
     }
     
+    func fetchCategoryObject(withTitle title: String) -> TrackerCategoryCoreData? {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "title == %@", title)
+        request.fetchLimit = 1
+        do {
+            return try context.fetch(request).first
+        } catch {
+            print("❌ Не удалось найти категорию '\(title)': \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    func addTracker(_ tracker: Tracker, toCategoryWithTitle title: String) throws {
+        let categoryObject: TrackerCategoryCoreData
+        if let existing = fetchCategoryObject(withTitle: title) {
+            categoryObject = existing
+        } else {
+            let newCategory = TrackerCategoryCoreData(context: context)
+            newCategory.title = title
+            categoryObject = newCategory
+        }
+        
+        let trackerObject = mapToCoreData(tracker)
+        trackerObject.category = categoryObject
+        
+        do {
+            try context.save()
+        } catch {
+            print("❌ Не удалось добавить трекер '\(tracker.title)' в категорию '\(title)': \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func updateCategoryTitle(oldTitle: String, newTitle: String) throws {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "title == %@", oldTitle)
+        request.fetchLimit = 1
+        do {
+            if let object = try context.fetch(request).first {
+                object.title = newTitle
+                try context.save()
+            }
+        } catch {
+            print("❌ Не удалось обновить категорию '\(oldTitle)' -> '\(newTitle)': \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func deleteCategory(withTitle title: String) throws {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "title == %@", title)
+        do {
+            let objects = try context.fetch(request)
+            for object in objects {
+                context.delete(object)
+            }
+            try context.save()
+        } catch {
+            print("❌ Не удалось удалить категорию '\(title)': \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
     // MARK: - Mapping
     private func mapToCategory(_ object: TrackerCategoryCoreData) -> TrackerCategory? {
         guard let title = object.title else { return nil }
         let trackers = (object.trackers as? Set<TrackerCoreData>)?
-            .compactMap { self.mapToTracker($0) } ?? []
+            .compactMap { self.mapToTracker($0) }
+            .sorted { $0.title < $1.title } ?? []
         return TrackerCategory(title: title, trackers: trackers)
     }
     
@@ -109,6 +181,10 @@ final class TrackerCategoryStore: NSObject {
         
         do {
             if let existing = try context.fetch(request).first {
+                existing.title = tracker.title
+                existing.emoji = tracker.emoji
+                existing.color = tracker.color
+                existing.schedule = tracker.schedule as NSObject
                 return existing
             }
         } catch {
@@ -134,6 +210,10 @@ extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
         for type: NSFetchedResultsChangeType,
         newIndexPath: IndexPath?
     ) {
+        delegate?.storeDidUpdate(fetchCategories())
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.storeDidUpdate(fetchCategories())
     }
 }
