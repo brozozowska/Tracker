@@ -174,7 +174,10 @@ final class TrackerCell: UICollectionViewCell {
         titleLabel.text = title
         colorView.backgroundColor = color
         emojiLabel.text = emoji
-        countLabel.text = "\(completedCount) \(dayWord(for: completedCount))"
+        countLabel.text = String.localizedStringWithFormat(
+            NSLocalizedString("tracker.days.count", comment: "Completed days count"),
+            completedCount
+        )
         trackerColor = color
         updateButtonStyle(isCompleted: isCompletedToday)
     }
@@ -183,23 +186,5 @@ final class TrackerCell: UICollectionViewCell {
     private func updateButtonStyle(isCompleted: Bool) {
         actionButton.setImage(isCompleted ? ActionButtonStyle.checkmark : ActionButtonStyle.plus, for: .normal)
         actionButton.backgroundColor = isCompleted ? trackerColor.withAlphaComponent(0.3) : trackerColor
-    }
-    
-    private func dayWord(for count: Int) -> String {
-        let remainder10 = count % 10
-        let remainder100 = count % 100
-        
-        if remainder100 >= 11 && remainder100 <= 14 {
-            return "дней"
-        }
-        
-        switch remainder10 {
-        case 1:
-            return "день"
-        case 2...4:
-            return "дня"
-        default:
-            return "дней"
-        }
     }
 }
