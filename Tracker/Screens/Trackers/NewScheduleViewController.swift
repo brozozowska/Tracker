@@ -39,7 +39,7 @@ final class NewScheduleViewController: UIViewController {
     
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("done.action", comment: "Done button title"), for: .normal)
         button.backgroundColor = .black
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
@@ -52,7 +52,6 @@ final class NewScheduleViewController: UIViewController {
     // MARK: - Private Properties
     private var selectedSchedule: [WeekDay]
     private let dayNames = WeekDay.allCases
-
 
     // MARK: - Initializers
     init(selectedDays: [WeekDay]) {
@@ -68,7 +67,7 @@ final class NewScheduleViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        navigationItem.title = "Расписание"
+        navigationItem.title = NSLocalizedString("schedule.title", comment: "Schedule screen title")
         
         setupTableView()
         setupSubviews()
@@ -137,7 +136,7 @@ extension NewScheduleViewController: UITableViewDataSource {
         
         let day = dayNames[indexPath.row]
         cell.configure(
-            day: day.rawValue,
+            day: day.longName,
             isOn: selectedSchedule.contains(day),
             isFirst: indexPath.row == 0,
             isLast: indexPath.row == dayNames.count - 1

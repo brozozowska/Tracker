@@ -1,0 +1,89 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Сергей Розов on 26.09.2025.
+  
+*/
+
+/* Title of trackers screen */
+"trackers.title" = "Трекеры";
+
+/* Empty state message on the trackers screen */
+"empty_state.message" = "Что будем отслеживать?";
+
+/* Confirmation message when deleting a tracker */
+"delete_tracker.confirm_message" = "Уверены, что хотите удалить трекер?";
+
+/* Confirmation message when deleting a category */
+"delete_category.confirm_message" = "Эта категория точно не нужна?";
+
+/* Common actions */
+"delete.action" = "Удалить";
+"edit.action" = "Редактировать";
+"cancel.action" = "Отменить";
+"create.action" = "Создать";
+"done.action" = "Готово";
+
+/* Onboarding screen*/
+"onboarding.page1.text" = "Отслеживайте только то, что хотите";
+"onboarding.page2.text" = "Даже если это не литры воды и йога";
+"onboarding.action.title" = "Вот это технологии!";
+
+/* Tab bar */
+"tab.trackers.title" = "Трекеры";
+"tab.statistics.title" = "Статистика";
+
+/* Trackers screen */
+"trackers.title" = "Трекеры";
+"trackers.empty.title" = "Что будем отслеживать?";
+"trackers.delete.confirm.message" = "Уверены, что хотите удалить трекер?";
+"delete.action" = "Удалить";
+
+/* Statistics screen */
+"statistics.title" = "Статистика";
+"statistics.empty.title" = "Статистика пока пуста";
+
+/* New tracker screen */
+"new_tracker.title" = "Новая привычка";
+"new_tracker.name.placeholder" = "Введите название трекера";
+
+/* Options */
+"category.title" = "Категория";
+"schedule.title" = "Расписание";
+
+/* Picker sections */
+"emoji.title" = "Emoji";
+"color.title" = "Цвет";
+
+/* Categories screen */
+"categories.empty.message" = "Привычки и события можно объединить по смыслу";
+"category.add_button" = "Добавить категорию";
+
+/* New/Edit category screen */
+"new_category.title" = "Новая категория";
+"edit_category.title" = "Редактирование категории";
+"new_category.name.placeholder" = "Введите название категории";
+
+/* Weekday long names */
+"weekday.monday.long" = "Понедельник";
+"weekday.tuesday.long" = "Вторник";
+"weekday.wednesday.long" = "Среда";
+"weekday.thursday.long" = "Четверг";
+"weekday.friday.long" = "Пятница";
+"weekday.saturday.long" = "Суббота";
+"weekday.sunday.long" = "Воскресенье";
+
+/* Weekday short names */
+"weekday.monday.short" = "Пн";
+"weekday.tuesday.short" = "Вт";
+"weekday.wednesday.short" = "Ср";
+"weekday.thursday.short" = "Чт";
+"weekday.friday.short" = "Пт";
+"weekday.saturday.short" = "Сб";
+"weekday.sunday.short" = "Вс";
+
+/* Schedule shortcuts */
+"schedule.everyday" = "Каждый день";
+"schedule.workdays" = "Будние дни";
+"schedule.weekend" = "Выходные";

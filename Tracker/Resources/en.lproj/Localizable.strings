@@ -1,0 +1,89 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Сергей Розов on 26.09.2025.
+  
+*/
+
+/* Title of trackers screen */
+"trackers.title" = "Trackers";
+
+/* Empty state message on the trackers screen */
+"empty_state.message" = "What shall we track?";
+
+/* Confirmation message when deleting a tracker */
+"delete_tracker.confirm_message" = "Are you sure you want to delete the tracker?";
+
+/* Confirmation message when deleting a category */
+"delete_category.confirm_message" = "Are you sure you don't need this category?";
+
+/* Common actions */
+"delete.action" = "Delete";
+"edit.action" = "Edit";
+"cancel.action" = "Cancel";
+"create.action" = "Create";
+"done.action" = "Done";
+
+/* Onboarding screen*/
+"onboarding.page1.text" = "Track only what you want";
+"onboarding.page2.text" = "Even if it's not liters of water and yoga";
+"onboarding.action.title" = "That's some technology!";
+
+/* Tab bar */
+"tab.trackers.title" = "Trackers";
+"tab.statistics.title" = "Statistics";
+
+/* Trackers screen */
+"trackers.title" = "Trackers";
+"trackers.empty.title" = "What shall we track?";
+"trackers.delete.confirm.message" = "Are you sure you want to delete the tracker?";
+"delete.action" = "Delete";
+
+/* Statistics screen */
+"statistics.title" = "Statistics";
+"statistics.empty.title" = "No statistics yet";
+
+/* New tracker screen */
+"new_tracker.title" = "New Habit";
+"new_tracker.name.placeholder" = "Enter tracker name";
+
+/* Options */
+"category.title" = "Category";
+"schedule.title" = "Schedule";
+
+/* Picker sections */
+"emoji.title" = "Emoji";
+"color.title" = "Color";
+
+/* Categories screen */
+"categories.empty.message" = "You can group habits and events by meaning.";
+"category.add_button" = "Add category";
+
+/* New/Edit category screen */
+"new_category.title" = "New Category";
+"edit_category.title" = "Edit Category";
+"new_category.name.placeholder" = "Enter category name";
+
+/* Weekday long names */
+"weekday.monday.long" = "Monday";
+"weekday.tuesday.long" = "Tuesday";
+"weekday.wednesday.long" = "Wednesday";
+"weekday.thursday.long" = "Thursday";
+"weekday.friday.long" = "Friday";
+"weekday.saturday.long" = "Saturday";
+"weekday.sunday.long" = "Sunday";
+
+/* Weekday short names */
+"weekday.monday.short" = "Mon";
+"weekday.tuesday.short" = "Tue";
+"weekday.wednesday.short" = "Wed";
+"weekday.thursday.short" = "Thu";
+"weekday.friday.short" = "Fri";
+"weekday.saturday.short" = "Sat";
+"weekday.sunday.short" = "Sun";
+
+/* Schedule shortcuts */
+"schedule.everyday" = "Every day";
+"schedule.workdays" = "Weekdays";
+"schedule.weekend" = "Weekends";

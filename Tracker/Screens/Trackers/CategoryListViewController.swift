@@ -41,7 +41,7 @@ final class CategoryListViewController: UIViewController {
     
     private lazy var emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = "Привычки и события можно объединить по смыслу"
+        label.text = NSLocalizedString("categories.empty.message", comment: "Categories empty state message")
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textAlignment = .center
         label.textColor = .black
@@ -60,7 +60,7 @@ final class CategoryListViewController: UIViewController {
     
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(NSLocalizedString("category.add_button", comment: "Add category button"), for: .normal)
         button.backgroundColor = .black
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
@@ -89,7 +89,7 @@ final class CategoryListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        navigationItem.title = "Категория"
+        navigationItem.title = NSLocalizedString("category.title", comment: "Category screen title")
                 
         setupTableView()
         setupSubviews()
@@ -283,7 +283,7 @@ extension CategoryListViewController: UITableViewDelegate {
         return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             guard let self else { return nil }
             
-            let edit = UIAction(title: "Редактировать") { _ in
+            let edit = UIAction(title: NSLocalizedString("edit.action", comment: "Edit action")) { _ in
                 self.hideBlur()
                 let editor = NewCategoryViewController(initialTitle: title)
                 editor.onFinish = { [weak self] newTitle in
@@ -296,12 +296,12 @@ extension CategoryListViewController: UITableViewDelegate {
                 self.present(nav, animated: true)
             }
             
-            let delete = UIAction(title: "Удалить", attributes: .destructive) { _ in
+            let delete = UIAction(title: NSLocalizedString("delete.action", comment: "Delete action"), attributes: .destructive) { _ in
                 self.hideBlur()
                 
                 BottomConfirmViewController.present(
                     from: self,
-                    message: "Эта категория точно не нужна?",
+                    message: NSLocalizedString("delete_category.confirm_message", comment: "Confirm delete category"),
                     onConfirm: { [weak self] in
                         guard let self else { return }
                         let titleToDelete = self.viewModel.categories[indexPath.row].title

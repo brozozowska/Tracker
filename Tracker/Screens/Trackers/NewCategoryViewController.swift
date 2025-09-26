@@ -28,7 +28,7 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = NSLocalizedString("new_category.name.placeholder", comment: "Category name placeholder")
         textField.borderStyle = .none
         textField.clearButtonMode = .whileEditing
         textField.returnKeyType = .done
@@ -42,7 +42,7 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("done.action", comment: "Done action"), for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
         button.backgroundColor = .lightGray
         button.setTitleColor(.white, for: .normal)
@@ -71,7 +71,9 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        navigationItem.title = initialTitle == nil ? "Новая категория" : "Редактирование категории"
+        navigationItem.title = initialTitle == nil
+        ? NSLocalizedString("new_category.title", comment: "New category screen title")
+        : NSLocalizedString("edit_category.title", comment: "Edit category screen title")
         
         setupSubviews()
         setupConstraints()

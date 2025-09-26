@@ -8,24 +8,20 @@
 import Foundation
 
 enum WeekDay: String, CaseIterable, Codable {
-    case monday = "Понедельник"
-    case tuesday = "Вторник"
-    case wednesday = "Среда"
-    case thursday = "Четверг"
-    case friday = "Пятница"
-    case saturday = "Суббота"
-    case sunday = "Воскресенье"
+    case monday = "weekday.monday"
+        case tuesday = "weekday.tuesday"
+        case wednesday = "weekday.wednesday"
+        case thursday = "weekday.thursday"
+        case friday = "weekday.friday"
+        case saturday = "weekday.saturday"
+        case sunday = "weekday.sunday"
+    
+    var longName: String {
+        NSLocalizedString("\(rawValue).long", comment: "Full weekday name")
+    }
     
     var shortName: String {
-        switch self {
-        case .monday: return "Пн"
-        case .tuesday: return "Вт"
-        case .wednesday: return "Ср"
-        case .thursday: return "Чт"
-        case .friday: return "Пт"
-        case .saturday: return "Сб"
-        case .sunday: return "Вс"
-        }
+        NSLocalizedString("\(rawValue).short", comment: "Short weekday name")
     }
     
     static var workdays: [WeekDay] {
@@ -45,14 +41,15 @@ extension Array where Element == WeekDay {
         let selected = Set(self)
         
         if selected == allDays {
-            return "Каждый день"
+            return NSLocalizedString("schedule.everyday", comment: "Every day")
         } else if selected == workdays {
-            return "Будние дни"
+            return NSLocalizedString("schedule.workdays", comment: "Workdays")
         } else if selected == weekend {
-            return "Выходные"
+            return NSLocalizedString("schedule.weekend", comment: "Weekend")
         } else {
             let sortedDays = WeekDay.allCases.filter { selected.contains($0) }
-            return sortedDays.map { $0.shortName }.joined(separator: ", ")
+            let names = sortedDays.map { $0.shortName }
+            return ListFormatter.localizedString(byJoining: names)
         }
     }
 }

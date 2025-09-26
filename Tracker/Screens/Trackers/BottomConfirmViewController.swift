@@ -73,7 +73,7 @@ final class BottomConfirmViewController: UIViewController {
 
     private lazy var confirmButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Удалить", for: .normal)
+        button.setTitle(NSLocalizedString("delete.action", comment: "Delete action title"), for: .normal)
         button.setTitleColor(.systemRed, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .regular)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -83,7 +83,7 @@ final class BottomConfirmViewController: UIViewController {
 
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(NSLocalizedString("cancel.action", comment: "Cancel action title"), for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
         button.backgroundColor = .systemBackground
@@ -101,7 +101,7 @@ final class BottomConfirmViewController: UIViewController {
     private let message: String
 
     // MARK: - Initializers
-    init(message: String = "Эта категория точно не нужна?") {
+    init(message: String = NSLocalizedString("delete_category.confirm_message", comment: "Default confirm message for deleting category")) {
         self.message = message
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen

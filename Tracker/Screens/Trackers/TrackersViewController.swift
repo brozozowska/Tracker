@@ -28,7 +28,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     private lazy var emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = "Что будем отслеживать?"
+        label.text = NSLocalizedString("trackers.empty.title", comment: "Empty state label text on trackers screen")
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textAlignment = .center
         label.textColor = .black
@@ -104,7 +104,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     // MARK: - Setup Methods
     private func setupNavigationBar() {
-        navigationItem.title = "Трекеры"
+        navigationItem.title = NSLocalizedString("trackers.title", comment: "Trackers screen title")
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
         
@@ -216,7 +216,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     private func presentDeleteTrackerConfirmation(for trackerId: UUID) {
         BottomConfirmViewController.present(
             from: self,
-            message: "Уверены, что хотите удалить трекер?",
+            message: NSLocalizedString("trackers.delete.confirm.message", comment: "Confirm tracker deletion message"),
             onConfirm: { [weak self] in
                 guard let self else { return }
                 do {
@@ -311,7 +311,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
         return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             guard let self else { return nil }
-            let delete = UIAction(title: "Удалить", attributes: .destructive) { _ in
+            let delete = UIAction(title: NSLocalizedString("delete.action", comment: "Delete action title"), attributes: .destructive) { _ in
                 self.presentDeleteTrackerConfirmation(for: tracker.id)
             }
             return UIMenu(children: [delete])
