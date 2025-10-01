@@ -16,6 +16,8 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         static let emptyLabelSpacing: CGFloat = 8
         static let cellHeight: CGFloat = 148
         static let cellSpacing: CGFloat = 16
+        static let searchBarTopSpacing: CGFloat = -10
+        static let searchBarBottomSpacing: CGFloat = 14
     }
     
     // MARK: - UI Elements
@@ -35,6 +37,16 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         return label
     }()
     
+    private lazy var searchBar: UISearchBar = {
+        let searchBar = UISearchBar(frame: .zero)
+        searchBar.placeholder = NSLocalizedString("search.placeholder", comment: "Search placeholder")
+        searchBar.searchBarStyle = .minimal
+        searchBar.autocapitalizationType = .none
+        searchBar.returnKeyType = .search
+        searchBar.delegate = self
+        return searchBar
+    }()
+    
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -42,7 +54,6 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     }()
     
     // MARK: - Search
-    private let searchController = UISearchController(searchResultsController: nil)
     private var searchText: String = "" {
         didSet { updateVisibleTrackers() }
     }
@@ -128,17 +139,6 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         datePicker.date = Date()
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
-        
-        searchController.searchResultsUpdater = self
-        searchController.obscuresBackgroundDuringPresentation = false
-        searchController.hidesNavigationBarDuringPresentation = false
-        searchController.searchBar.placeholder = NSLocalizedString("search.placeholder", comment: "Search placeholder")
-        searchController.searchBar.autocapitalizationType = .none
-        navigationItem.searchController = searchController
-        navigationItem.hidesSearchBarWhenScrolling = false
-        navigationItem.preferredSearchBarPlacement = .stacked
-        
-        definesPresentationContext = true
     }
     
     private func setupCollectionView() {
@@ -157,6 +157,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
 
     private func addSubviews() {
         [
+            searchBar,
             collectionView,
             emptyStateImageView,
             emptyStateLabel
@@ -168,7 +169,11 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
 
     private func setupLayout() {
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: UIConstants.searchBarTopSpacing),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.horizontalInset/2),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.horizontalInset/2),
+            
+            collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: UIConstants.searchBarBottomSpacing),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.horizontalInset),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.horizontalInset),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
@@ -266,10 +271,29 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     }
 }
 
-// MARK: - UISearchResultsUpdating
-extension TrackersViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
-        searchText = searchController.searchBar.text ?? ""
+// MARK: - UISearchBarDelegate
+extension TrackersViewController: UISearchBarDelegate {
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchBar.setShowsCancelButton(true, animated: true)
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        searchBar.setShowsCancelButton(false, animated: true)
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        self.searchText = ""
+        searchBar.resignFirstResponder()
+        searchBar.setShowsCancelButton(false, animated: true)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        self.searchText = searchText
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
     }
 }
 
