@@ -39,6 +39,7 @@
 "trackers.empty.title" = "Что будем отслеживать?";
 "trackers.delete.confirm.message" = "Уверены, что хотите удалить трекер?";
 "delete.action" = "Удалить";
+"search.placeholder" = "Поиск";
 
 /* Statistics screen */
 "statistics.title" = "Статистика";

@@ -41,6 +41,12 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         return collectionView
     }()
     
+    // MARK: - Search
+    private let searchController = UISearchController(searchResultsController: nil)
+    private var searchText: String = "" {
+        didSet { updateVisibleTrackers() }
+    }
+    
     // MARK: - Public Properties
     var categories: [TrackerCategory] = [] {
         didSet { updateVisibleTrackers() }
@@ -122,6 +128,17 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         datePicker.date = Date()
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.searchBar.placeholder = NSLocalizedString("search.placeholder", comment: "Search placeholder")
+        searchController.searchBar.autocapitalizationType = .none
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        navigationItem.preferredSearchBarPlacement = .stacked
+        
+        definesPresentationContext = true
     }
     
     private func setupCollectionView() {
@@ -169,11 +186,18 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     // MARK: - Private Methods
     private func updateVisibleTrackers() {
         let currentWeekDay = weekDay(for: selectedDate)
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         
         visibleCategories = categories.compactMap { category in
-            let filteredTrackers = category.trackers.filter { $0.schedule.contains(currentWeekDay) }
-            guard !filteredTrackers.isEmpty else { return nil }
-            return TrackerCategory(title: category.title, trackers: filteredTrackers)
+            let trackersForDay = category.trackers.filter { $0.schedule.contains(currentWeekDay) }
+            let filtered: [Tracker]
+            if query.isEmpty {
+                filtered = trackersForDay
+            } else {
+                filtered = trackersForDay.filter { $0.title.lowercased().contains(query) }
+            }
+            guard !filtered.isEmpty else { return nil }
+            return TrackerCategory(title: category.title, trackers: filtered)
         }
         
         updateEmptyStateVisibility()
@@ -239,6 +263,13 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         updateVisibleTrackers()
         collectionView.reloadData()
         updateEmptyStateVisibility()
+    }
+}
+
+// MARK: - UISearchResultsUpdating
+extension TrackersViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        searchText = searchController.searchBar.text ?? ""
     }
 }
 

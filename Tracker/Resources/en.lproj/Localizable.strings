@@ -39,6 +39,7 @@
 "trackers.empty.title" = "What shall we track?";
 "trackers.delete.confirm.message" = "Are you sure you want to delete the tracker?";
 "delete.action" = "Delete";
+"search.placeholder" = "Search";
 
 /* Statistics screen */
 "statistics.title" = "Statistics";
