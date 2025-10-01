@@ -56,7 +56,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
     private lazy var nameContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemGray6
+        view.backgroundColor = .secondarySystemBackground
         view.layer.cornerRadius = UIConstants.cornerRadius
         return view
     }()
@@ -70,12 +70,13 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .sentences
         textField.font = .systemFont(ofSize: 17)
+        textField.textColor = .label
         return textField
     }()
 
     private lazy var optionsContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemGray6
+        view.backgroundColor = .secondarySystemBackground
         view.layer.cornerRadius = UIConstants.cornerRadius
         return view
     }()
@@ -84,7 +85,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     
     private lazy var divider: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemGray4
+        view.backgroundColor = .separator
         return view
     }()
     
@@ -479,7 +480,13 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         && selectedColor != nil
         
         createButton.isEnabled = isValid
-        createButton.backgroundColor = isValid ? .black : .lightGray
+        if isValid {
+            createButton.backgroundColor = .label
+            createButton.setTitleColor(.systemBackground, for: .normal)
+        } else {
+            createButton.backgroundColor = .lightGray
+            createButton.setTitleColor(.white, for: .normal)
+        }
     }
     
     // MARK: - NewScheduleViewControllerDelegate

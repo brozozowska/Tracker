@@ -40,8 +40,8 @@ final class NewScheduleViewController: UIViewController {
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(NSLocalizedString("done.action", comment: "Done button title"), for: .normal)
-        button.backgroundColor = .black
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .label
+        button.setTitleColor(.systemBackground, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
         return button
     }()

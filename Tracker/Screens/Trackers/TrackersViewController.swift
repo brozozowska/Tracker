@@ -33,7 +33,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         label.text = NSLocalizedString("trackers.empty.title", comment: "Empty state label text on trackers screen")
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textAlignment = .center
-        label.textColor = .black
+        label.textColor = .label
         return label
     }()
     
@@ -131,7 +131,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
             target: self,
             action: #selector(addTrackerTapped)
         )
-        navigationItem.leftBarButtonItem?.tintColor = .black
+        navigationItem.leftBarButtonItem?.tintColor = .label
         
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date

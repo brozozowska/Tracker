@@ -22,7 +22,7 @@ class StatisticsViewController: UIViewController {
         label.text = NSLocalizedString("statistics.empty.title", comment: "Statistics empty state text")
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textAlignment = .center
-        label.textColor = .black
+        label.textColor = .label
         return label
     }()
     

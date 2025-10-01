@@ -44,7 +44,7 @@ final class CategoryListViewController: UIViewController {
         label.text = NSLocalizedString("categories.empty.message", comment: "Categories empty state message")
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textAlignment = .center
-        label.textColor = .black
+        label.textColor = .label
         label.numberOfLines = 2
         return label
     }()
@@ -61,8 +61,8 @@ final class CategoryListViewController: UIViewController {
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(NSLocalizedString("category.add_button", comment: "Add category button"), for: .normal)
-        button.backgroundColor = .black
-        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .label
+        button.setTitleColor(.systemBackground, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
         return button
     }()

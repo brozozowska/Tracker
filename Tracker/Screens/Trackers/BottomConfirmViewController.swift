@@ -47,7 +47,9 @@ final class BottomConfirmViewController: UIViewController {
 
     private lazy var confirmContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.white.withAlphaComponent(UIConstants.confirmAlpha)
+        view.backgroundColor = UIColor { trait in
+            trait.userInterfaceStyle == .dark ? .secondarySystemBackground : UIColor.white.withAlphaComponent(UIConstants.confirmAlpha)
+        }
         view.layer.cornerRadius = UIConstants.cornerRadius
         view.layer.masksToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -66,7 +68,7 @@ final class BottomConfirmViewController: UIViewController {
 
     private lazy var divider: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemGray2
+        view.backgroundColor = .separator
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -86,7 +88,9 @@ final class BottomConfirmViewController: UIViewController {
         button.setTitle(NSLocalizedString("cancel.action", comment: "Cancel action title"), for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
-        button.backgroundColor = .systemBackground
+        button.backgroundColor = UIColor { trait in
+            trait.userInterfaceStyle == .dark ? .secondarySystemBackground : .systemBackground
+        }
         button.layer.cornerRadius = UIConstants.cornerRadius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)

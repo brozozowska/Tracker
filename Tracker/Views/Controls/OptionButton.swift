@@ -69,7 +69,7 @@ final class OptionButton: UIControl {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        backgroundColor = .systemGray6
+        backgroundColor = .secondarySystemBackground
         layer.cornerRadius = UIConstants.cornerRadius
         
         setupSubviews()

@@ -21,7 +21,7 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     // MARK: - UI Elements
     private lazy var nameContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemGray6
+        view.backgroundColor = UIColor.secondarySystemBackground
         view.layer.cornerRadius = UIConstants.cornerRadius
         return view
     }()
@@ -121,7 +121,14 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
         let trimmed = (nameTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let enabled = !trimmed.isEmpty
         doneButton.isEnabled = enabled
-        doneButton.backgroundColor = enabled ? .black : .lightGray
+        
+        if enabled {
+            doneButton.backgroundColor = .label
+            doneButton.setTitleColor(.systemBackground, for: .normal)
+        } else {
+            doneButton.backgroundColor = .lightGray
+            doneButton.setTitleColor(.white, for: .normal)
+        }
     }
     
     @objc private func dismissKeyboard() {
