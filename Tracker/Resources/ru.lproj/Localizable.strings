@@ -43,7 +43,11 @@
 
 /* Statistics screen */
 "statistics.title" = "Статистика";
-"statistics.empty.title" = "Статистика пока пуста";
+"statistics.empty.title" = "Анализировать пока нечего";
+"statistics.best_period" = "Лучший период";
+"statistics.perfect_days" = "Идеальные дни";
+"statistics.completed_total" = "Трекеров завершено";
+"statistics.average_per_day" = "Среднее значение";
 
 /* New tracker screen */
 "new_tracker.title" = "Новая привычка";

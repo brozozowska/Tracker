@@ -20,7 +20,7 @@ final class BottomConfirmViewController: UIViewController {
         static let cancelButtonTopSpacing: CGFloat = 8
         static let contentBottomInset: CGFloat = 8
         static let backgroundDimAlpha: CGFloat = 0.4
-        static let confirmAlpha: CGFloat = 0.6
+        static let confirmAlpha: CGFloat = 0.8
         static let presentDuration: TimeInterval = 0.15
         static let dismissDuration: TimeInterval = 0.15
     }

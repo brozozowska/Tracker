@@ -43,7 +43,11 @@
 
 /* Statistics screen */
 "statistics.title" = "Statistics";
-"statistics.empty.title" = "No statistics yet";
+"statistics.empty.title" = "There’s nothing to analyze yet";
+"statistics.best_period" = "Best period";
+"statistics.perfect_days" = "Perfect days";
+"statistics.completed_total" = "Trackers completed";
+"statistics.average_per_day" = "Average per day";
 
 /* New tracker screen */
 "new_tracker.title" = "New Habit";

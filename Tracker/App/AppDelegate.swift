@@ -15,11 +15,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        let attributes: [NSAttributedString.Key: Any] = [
+        let smallTitleAttributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 16, weight: .medium),
             .foregroundColor: UIColor.label
-        ]        
-        UINavigationBar.appearance().titleTextAttributes = attributes
+        ]
+        let largeTitleAttributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 34, weight: .bold),
+            .foregroundColor: UIColor.label
+        ]
+        
+        let navBarAppearance = UINavigationBar.appearance()
+        navBarAppearance.titleTextAttributes = smallTitleAttributes
+        navBarAppearance.largeTitleTextAttributes = largeTitleAttributes
         
         DaysValueTransformer.register()
         UIColorTransformer.register()

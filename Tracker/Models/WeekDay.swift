@@ -33,6 +33,13 @@ enum WeekDay: String, CaseIterable, Codable {
     }
 }
 
+extension WeekDay {
+    init(from date: Date, calendar: Calendar = .current) {
+        let index = (calendar.component(.weekday, from: date) + 5) % 7
+        self = WeekDay.allCases[index]
+    }
+}
+
 extension Array where Element == WeekDay {
     func formattedWeekDay() -> String {
         let allDays = Set(WeekDay.allCases)

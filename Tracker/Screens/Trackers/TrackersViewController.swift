@@ -190,7 +190,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     // MARK: - Private Methods
     private func updateVisibleTrackers() {
-        let currentWeekDay = weekDay(for: selectedDate)
+        let currentWeekDay = WeekDay(from: selectedDate)
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         
         visibleCategories = categories.compactMap { category in
@@ -234,12 +234,6 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
                     break
                 }
             }
-    }
-    
-    private func weekDay(for date: Date) -> WeekDay {
-        let calendar = Calendar.current
-        let weekdayIndex = (calendar.component(.weekday, from: date) + 5) % 7
-        return WeekDay.allCases[weekdayIndex]
     }
     
     private func presentDeleteTrackerConfirmation(for trackerId: UUID) {
