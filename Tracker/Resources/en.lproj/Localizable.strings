@@ -23,6 +23,7 @@
 "edit.action" = "Edit";
 "cancel.action" = "Cancel";
 "create.action" = "Create";
+"save.action" = "Save";
 "done.action" = "Done";
 
 /* Onboarding screen*/
@@ -38,7 +39,6 @@
 "trackers.title" = "Trackers";
 "trackers.empty.title" = "What shall we track?";
 "trackers.delete.confirm.message" = "Are you sure you want to delete the tracker?";
-"delete.action" = "Delete";
 "search.placeholder" = "Search";
 
 /* Statistics screen */
@@ -48,6 +48,9 @@
 /* New tracker screen */
 "new_tracker.title" = "New Habit";
 "new_tracker.name.placeholder" = "Enter tracker name";
+
+/* Edit tracker screen */
+"edit_tracker.title" = "Edit Habit";
 
 /* Options */
 "category.title" = "Category";

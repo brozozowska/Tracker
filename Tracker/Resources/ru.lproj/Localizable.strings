@@ -23,6 +23,7 @@
 "edit.action" = "Редактировать";
 "cancel.action" = "Отменить";
 "create.action" = "Создать";
+"save.action" = "Сохранить";
 "done.action" = "Готово";
 
 /* Onboarding screen*/
@@ -38,7 +39,6 @@
 "trackers.title" = "Трекеры";
 "trackers.empty.title" = "Что будем отслеживать?";
 "trackers.delete.confirm.message" = "Уверены, что хотите удалить трекер?";
-"delete.action" = "Удалить";
 "search.placeholder" = "Поиск";
 
 /* Statistics screen */
@@ -48,6 +48,9 @@
 /* New tracker screen */
 "new_tracker.title" = "Новая привычка";
 "new_tracker.name.placeholder" = "Введите название трекера";
+
+/* Edit tracker screen */
+"edit_tracker.title" = "Редактирование привычки";
 
 /* Options */
 "category.title" = "Категория";

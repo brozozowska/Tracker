@@ -269,6 +269,17 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         collectionView.reloadData()
         updateEmptyStateVisibility()
     }
+    
+    func newTrackerViewController(
+        _ viewController: NewTrackerViewController,
+        didUpdate tracker: Tracker,
+        movedTo categoryTitle: String
+    ) {
+        categories = categoryStore.fetchCategories()
+        updateVisibleTrackers()
+        collectionView.reloadData()
+        updateEmptyStateVisibility()
+    }
 }
 
 // MARK: - UISearchBarDelegate
@@ -363,13 +374,30 @@ extension TrackersViewController: UICollectionViewDataSource {
         contextMenuConfigurationForItemAt indexPath: IndexPath,
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
+        let categoryTitle = visibleCategories[indexPath.section].title
         let tracker = visibleCategories[indexPath.section].trackers[indexPath.item]
         return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             guard let self else { return nil }
+            
+            let edit = UIAction(title: NSLocalizedString("edit.action", comment: "Edit action title")) { _ in
+                let completedCount = self.completedTrackers.filter { $0.trackerId == tracker.id }.count
+                let editor = NewTrackerViewController(
+                    categoryStore: self.categoryStore,
+                    mode: .edit(tracker: tracker, categoryTitle: categoryTitle, completedDays: completedCount)
+                )
+                editor.delegate = self
+                let nav = UINavigationController(rootViewController: editor)
+                nav.modalPresentationStyle = .pageSheet
+                if let sheet = nav.sheetPresentationController {
+                    sheet.detents = [.large()]
+                }
+                self.present(nav, animated: true)
+            }
+            
             let delete = UIAction(title: NSLocalizedString("delete.action", comment: "Delete action title"), attributes: .destructive) { _ in
                 self.presentDeleteTrackerConfirmation(for: tracker.id)
             }
-            return UIMenu(children: [delete])
+            return UIMenu(children: [edit, delete])
         }
     }
 }
