@@ -258,6 +258,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
             onConfirm: { [weak self] in
                 guard let self else { return }
                 do {
+                    try self.recordStore.deleteAllRecords(for: trackerId)
                     try self.trackerStore.deleteTracker(id: trackerId)
                 } catch {
                     print("❌ Ошибка удаления трекера id=\(trackerId): \(error.localizedDescription)")
