@@ -57,6 +57,7 @@
 "categories.empty.message" = "Привычки и события можно объединить по смыслу";
 "category.add_button" = "Добавить категорию";
 "delete_category.confirm_message" = "Эта категория точно не нужна?";
+"category.uncategorized.title" = "Без категории";
 
 /* New/Edit category screen */
 "new_category.title" = "Новая категория";

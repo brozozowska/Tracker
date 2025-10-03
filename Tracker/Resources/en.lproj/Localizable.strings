@@ -57,6 +57,7 @@
 "categories.empty.message" = "You can group habits and events by meaning.";
 "category.add_button" = "Add category";
 "delete_category.confirm_message" = "Are you sure you don't need this category?";
+"category.uncategorized.title" = "No category";
 
 /* New/Edit category screen */
 "new_category.title" = "New Category";

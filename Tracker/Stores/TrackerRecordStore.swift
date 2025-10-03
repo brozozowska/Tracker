@@ -177,4 +177,3 @@ extension TrackerRecordStore: NSFetchedResultsControllerDelegate {
         delegate?.storeDidUpdate(mapped)
     }
 }
-
