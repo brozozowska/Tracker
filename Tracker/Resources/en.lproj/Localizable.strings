@@ -64,6 +64,13 @@
 "edit_category.title" = "Edit Category";
 "new_category.name.placeholder" = "Enter category name";
 
+/* Filters screen */
+"filters.title" = "Filters";
+"filters.all" = "All trackers";
+"filters.today" = "Trackers for today";
+"filters.completed" = "Completed";
+"filters.uncompleted" = "Uncompleted";
+
 /* Weekday long names */
 "weekday.monday.long" = "Monday";
 "weekday.tuesday.long" = "Tuesday";

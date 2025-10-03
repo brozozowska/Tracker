@@ -18,6 +18,11 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         static let cellSpacing: CGFloat = 16
         static let searchBarTopSpacing: CGFloat = -10
         static let searchBarBottomSpacing: CGFloat = 14
+        static let filterButtonWidth: CGFloat = 114
+        static let filterButtonHeight: CGFloat = 50
+        static let filterButtonBottomInset: CGFloat = 16
+        static let filterButtonCornerRadius: CGFloat = 16
+        static let collectionBottomExtraInset: CGFloat = 8
     }
     
     // MARK: - UI Elements
@@ -51,6 +56,16 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         return collectionView
+    }()
+    
+    private lazy var filtersButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(NSLocalizedString("filters.title", comment: "Filters button title"), for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .systemBlue
+        button.layer.cornerRadius = UIConstants.filterButtonCornerRadius
+        button.addTarget(self, action: #selector(filtersTapped), for: .touchUpInside)
+        return button
     }()
     
     // MARK: - Search
@@ -100,6 +115,11 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         updateVisibleTrackers()
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        adjustCollectionInsets()
+    }
+    
     // MARK: - Actions
     @objc private func addTrackerTapped() {        
         let creator = NewTrackerViewController(categoryStore: categoryStore)
@@ -112,6 +132,18 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
             sheet.detents = [.large()]
         }
         
+        present(navigationController, animated: true)
+    }
+    
+    @objc private func filtersTapped() {
+        let filtersViewController = FiltersViewController()
+        
+        let navigationController = UINavigationController(rootViewController: filtersViewController)
+        navigationController.modalPresentationStyle = .pageSheet
+        
+        if let sheet = navigationController.sheetPresentationController {
+            sheet.detents = [.large()]
+        }
         present(navigationController, animated: true)
     }
     
@@ -160,7 +192,8 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
             searchBar,
             collectionView,
             emptyStateImageView,
-            emptyStateLabel
+            emptyStateLabel,
+            filtersButton
         ].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
@@ -184,8 +217,21 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
             emptyStateImageView.widthAnchor.constraint(equalToConstant: UIConstants.emptyImageSize),
             
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: UIConstants.emptyLabelSpacing)
+            emptyStateLabel.topAnchor.constraint(equalTo: emptyStateImageView.bottomAnchor, constant: UIConstants.emptyLabelSpacing),
+            
+            filtersButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filtersButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -UIConstants.filterButtonBottomInset),
+            filtersButton.widthAnchor.constraint(equalToConstant: UIConstants.filterButtonWidth),
+            filtersButton.heightAnchor.constraint(equalToConstant: UIConstants.filterButtonHeight)
         ])
+    }
+    
+    private func adjustCollectionInsets() {
+        let bottomInset = UIConstants.filterButtonHeight + UIConstants.filterButtonBottomInset + UIConstants.collectionBottomExtraInset
+        if collectionView.contentInset.bottom != bottomInset {
+            collectionView.contentInset.bottom = bottomInset
+            collectionView.verticalScrollIndicatorInsets.bottom = bottomInset
+        }
     }
     
     // MARK: - Private Methods

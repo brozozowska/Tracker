@@ -102,7 +102,7 @@ final class CategoryListViewController: UIViewController {
     
     // MARK: - Setup Layout
     private func setupTableView() {
-        tableView.register(CategoryCell.self, forCellReuseIdentifier: CategoryCell.reuseId)
+        tableView.register(ListOptionCell.self, forCellReuseIdentifier: ListOptionCell.reuseId)
         tableView.dataSource = self
         tableView.delegate = self
     }
@@ -164,7 +164,7 @@ final class CategoryListViewController: UIViewController {
     private func refreshSelectionUI() {
         for (index, category) in viewModel.categories.enumerated() {
             let indexPath = IndexPath(row: index, section: 0)
-            if let cell = tableView.cellForRow(at: indexPath) as? CategoryCell {
+            if let cell = tableView.cellForRow(at: indexPath) as? ListOptionCell {
                 let isSelected = (category.title == viewModel.selectedCategory)
                 cell.setChecked(isSelected)
             }
@@ -231,14 +231,14 @@ extension CategoryListViewController: UITableViewDataSource {
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(
-            withIdentifier: CategoryCell.reuseId,
+            withIdentifier: ListOptionCell.reuseId,
             for: indexPath
-        ) as? CategoryCell else { return UITableViewCell() }
+        ) as? ListOptionCell else { return UITableViewCell() }
         
         let category = viewModel.categories[indexPath.row]
         let isSelected = (category.title == viewModel.selectedCategory)
         cell.configure(
-            day: category.title,
+            title: category.title,
             isSelected: isSelected,
             isFirst: indexPath.row == 0,
             isLast: indexPath.row == viewModel.categories.count - 1
@@ -258,11 +258,11 @@ extension CategoryListViewController: UITableViewDelegate {
         viewModel.selectCategory(at: indexPath.row)
         
         for cell in tableView.visibleCells {
-            if let categoryCell = cell as? CategoryCell {
-                categoryCell.setChecked(false)
+            if let optionCell = cell as? ListOptionCell {
+                optionCell.setChecked(false)
             }
         }
-        if let selectedCell = tableView.cellForRow(at: indexPath) as? CategoryCell {
+        if let selectedCell = tableView.cellForRow(at: indexPath) as? ListOptionCell {
             selectedCell.setChecked(true)
         }
         

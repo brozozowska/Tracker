@@ -64,6 +64,13 @@
 "edit_category.title" = "Редактирование категории";
 "new_category.name.placeholder" = "Введите название категории";
 
+/* Filters screen */
+"filters.title" = "Фильтры";
+"filters.all" = "Все трекеры";
+"filters.today" = "Трекеры на сегодня";
+"filters.completed" = "Завершенные";
+"filters.uncompleted" = "Не завершенные";
+
 /* Weekday long names */
 "weekday.monday.long" = "Понедельник";
 "weekday.tuesday.long" = "Вторник";

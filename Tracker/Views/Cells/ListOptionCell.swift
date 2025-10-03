@@ -1,5 +1,5 @@
 //
-//  CategoryCell.swift
+//  ListOptionCell.swift
 //  Tracker
 //
 //  Created by Сергей Розов on 19.09.2025.
@@ -7,10 +7,10 @@
 
 import UIKit
 
-final class CategoryCell: UITableViewCell {
+final class ListOptionCell: UITableViewCell {
     
     // MARK: - Constants
-    static let reuseId = "CategoryCell"
+    static let reuseId = "ListOptionCell"
     
     private enum UIConstants {
         static let cornerRadius: CGFloat = 16
@@ -101,8 +101,8 @@ final class CategoryCell: UITableViewCell {
     }
     
     // MARK: - Public Methods
-    func configure(day: String, isSelected: Bool, isFirst: Bool, isLast: Bool) {
-        titleLabel.text = day
+    func configure(title: String, isSelected: Bool, isFirst: Bool, isLast: Bool) {
+        titleLabel.text = title
 
         containerView.layer.cornerRadius = UIConstants.cornerRadius
         containerView.layer.maskedCorners = []
