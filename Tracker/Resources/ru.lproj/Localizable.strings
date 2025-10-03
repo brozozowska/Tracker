@@ -6,17 +6,10 @@
   
 */
 
-/* Title of trackers screen */
-"trackers.title" = "Трекеры";
-
-/* Empty state message on the trackers screen */
-"empty_state.message" = "Что будем отслеживать?";
-
-/* Confirmation message when deleting a tracker */
-"delete_tracker.confirm_message" = "Уверены, что хотите удалить трекер?";
-
-/* Confirmation message when deleting a category */
-"delete_category.confirm_message" = "Эта категория точно не нужна?";
+/* Onboarding screen*/
+"onboarding.page1.text" = "Отслеживайте только то, что хотите";
+"onboarding.page2.text" = "Даже если это не литры воды и йога";
+"onboarding.action.title" = "Вот это технологии!";
 
 /* Common actions */
 "delete.action" = "Удалить";
@@ -25,11 +18,6 @@
 "create.action" = "Создать";
 "save.action" = "Сохранить";
 "done.action" = "Готово";
-
-/* Onboarding screen*/
-"onboarding.page1.text" = "Отслеживайте только то, что хотите";
-"onboarding.page2.text" = "Даже если это не литры воды и йога";
-"onboarding.action.title" = "Вот это технологии!";
 
 /* Tab bar */
 "tab.trackers.title" = "Трекеры";
@@ -40,6 +28,7 @@
 "trackers.empty.title" = "Что будем отслеживать?";
 "trackers.delete.confirm.message" = "Уверены, что хотите удалить трекер?";
 "search.placeholder" = "Поиск";
+"trackers.search.empty.title" = "Ничего не найдено";
 
 /* Statistics screen */
 "statistics.title" = "Статистика";
@@ -67,6 +56,7 @@
 /* Categories screen */
 "categories.empty.message" = "Привычки и события можно объединить по смыслу";
 "category.add_button" = "Добавить категорию";
+"delete_category.confirm_message" = "Эта категория точно не нужна?";
 
 /* New/Edit category screen */
 "new_category.title" = "Новая категория";

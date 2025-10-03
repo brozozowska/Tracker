@@ -211,8 +211,23 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     private func updateEmptyStateVisibility() {
         let isEmpty = visibleCategories.isEmpty
-        emptyStateImageView.isHidden = !isEmpty
-        emptyStateLabel.isHidden = !isEmpty
+        let isSearchActive = !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        
+        if isEmpty {
+            emptyStateImageView.isHidden = false
+            emptyStateLabel.isHidden = false
+            
+            if isSearchActive {
+                emptyStateImageView.image = UIImage(resource: .emptySearch)
+                emptyStateLabel.text = NSLocalizedString("trackers.search.empty.title", comment: "Nothing found empty state label")
+            } else {
+                emptyStateImageView.image = UIImage(resource: .empty)
+                emptyStateLabel.text = NSLocalizedString("trackers.empty.title", comment: "Empty state label text on trackers screen")
+            }
+        } else {
+            emptyStateImageView.isHidden = true
+            emptyStateLabel.isHidden = true
+        }
     }
     
     private func toggleTrackerCompletion(_ tracker: Tracker) {

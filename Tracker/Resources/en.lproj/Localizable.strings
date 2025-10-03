@@ -6,17 +6,10 @@
   
 */
 
-/* Title of trackers screen */
-"trackers.title" = "Trackers";
-
-/* Empty state message on the trackers screen */
-"empty_state.message" = "What shall we track?";
-
-/* Confirmation message when deleting a tracker */
-"delete_tracker.confirm_message" = "Are you sure you want to delete the tracker?";
-
-/* Confirmation message when deleting a category */
-"delete_category.confirm_message" = "Are you sure you don't need this category?";
+/* Onboarding screen*/
+"onboarding.page1.text" = "Track only what you want";
+"onboarding.page2.text" = "Even if it's not liters of water and yoga";
+"onboarding.action.title" = "That's some technology!";
 
 /* Common actions */
 "delete.action" = "Delete";
@@ -25,11 +18,6 @@
 "create.action" = "Create";
 "save.action" = "Save";
 "done.action" = "Done";
-
-/* Onboarding screen*/
-"onboarding.page1.text" = "Track only what you want";
-"onboarding.page2.text" = "Even if it's not liters of water and yoga";
-"onboarding.action.title" = "That's some technology!";
 
 /* Tab bar */
 "tab.trackers.title" = "Trackers";
@@ -40,6 +28,7 @@
 "trackers.empty.title" = "What shall we track?";
 "trackers.delete.confirm.message" = "Are you sure you want to delete the tracker?";
 "search.placeholder" = "Search";
+"trackers.search.empty.title" = "Nothing found";
 
 /* Statistics screen */
 "statistics.title" = "Statistics";
@@ -67,6 +56,7 @@
 /* Categories screen */
 "categories.empty.message" = "You can group habits and events by meaning.";
 "category.add_button" = "Add category";
+"delete_category.confirm_message" = "Are you sure you don't need this category?";
 
 /* New/Edit category screen */
 "new_category.title" = "New Category";
