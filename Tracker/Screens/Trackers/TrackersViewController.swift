@@ -92,6 +92,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     private let recordStore = TrackerRecordStore()
     
     private var trackers: [Tracker] = []
+    private var activeFilter: TrackerFilter?
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -136,7 +137,9 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     }
     
     @objc private func filtersTapped() {
-        let filtersViewController = FiltersViewController()
+        let selectedForList: TrackerFilter? = (activeFilter == .completed || activeFilter == .uncompleted) ? activeFilter : nil
+        let filtersViewController = FiltersViewController(selected: selectedForList)
+        filtersViewController.delegate = self
         
         let navigationController = UINavigationController(rootViewController: filtersViewController)
         navigationController.modalPresentationStyle = .pageSheet
@@ -227,7 +230,10 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     }
     
     private func adjustCollectionInsets() {
-        let bottomInset = UIConstants.filterButtonHeight + UIConstants.filterButtonBottomInset + UIConstants.collectionBottomExtraInset
+        let bottomInset = (
+            filtersButton.isHidden ? UIConstants.collectionBottomExtraInset
+            : UIConstants.filterButtonHeight + UIConstants.filterButtonBottomInset + UIConstants.collectionBottomExtraInset
+        )
         if collectionView.contentInset.bottom != bottomInset {
             collectionView.contentInset.bottom = bottomInset
             collectionView.verticalScrollIndicatorInsets.bottom = bottomInset
@@ -239,13 +245,33 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         let currentWeekDay = WeekDay(from: selectedDate)
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         
+        let hasAnyForDay = categories.contains { category in
+            category.trackers.contains { $0.schedule.contains(currentWeekDay) }
+        }
+        filtersButton.isHidden = !(activeFilter == .all || hasAnyForDay)
+        adjustCollectionInsets()
+        
+        let completedTodayIds: Set<UUID> = Set(
+            completedTrackers
+                .filter { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+                .map { $0.trackerId }
+        )
+        
         visibleCategories = categories.compactMap { category in
-            let trackersForDay = category.trackers.filter { $0.schedule.contains(currentWeekDay) }
-            let filtered: [Tracker]
-            if query.isEmpty {
-                filtered = trackersForDay
-            } else {
-                filtered = trackersForDay.filter { $0.title.lowercased().contains(query) }
+            var filtered: [Tracker] = (activeFilter == .all)
+                ? category.trackers
+                : category.trackers.filter { $0.schedule.contains(currentWeekDay) }
+            
+            if !query.isEmpty {
+                filtered = filtered.filter { $0.title.lowercased().contains(query) }
+            }
+            switch activeFilter {
+            case .completed:
+                filtered = filtered.filter { completedTodayIds.contains($0.id) }
+            case .uncompleted:
+                filtered = filtered.filter { !completedTodayIds.contains($0.id) }
+            default:
+                break
             }
             guard !filtered.isEmpty else { return nil }
             return TrackerCategory(title: category.title, trackers: filtered)
@@ -258,12 +284,13 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     private func updateEmptyStateVisibility() {
         let isEmpty = visibleCategories.isEmpty
         let isSearchActive = !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let isFilterActive = (activeFilter == .completed || activeFilter == .uncompleted)
         
         if isEmpty {
             emptyStateImageView.isHidden = false
             emptyStateLabel.isHidden = false
             
-            if isSearchActive {
+            if isSearchActive || isFilterActive {
                 emptyStateImageView.image = UIImage(resource: .emptySearch)
                 emptyStateLabel.text = NSLocalizedString("trackers.search.empty.title", comment: "Nothing found empty state label")
             } else {
@@ -279,22 +306,17 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     private func toggleTrackerCompletion(_ tracker: Tracker) {
         guard selectedDate <= Date() else { return }
 
-            if let record = recordStore.record(for: tracker.id, on: selectedDate) {
-                try? recordStore.deleteRecord(record)
-                completedTrackers.removeAll { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
-            } else {
-                let newRecord = TrackerRecord(trackerId: tracker.id, date: Calendar.current.startOfDay(for: selectedDate))
-                try? recordStore.addRecord(newRecord)
-                completedTrackers.append(newRecord)
-            }
+        if let record = recordStore.record(for: tracker.id, on: selectedDate) {
+            try? recordStore.deleteRecord(record)
+            completedTrackers.removeAll { $0.trackerId == tracker.id && Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
+        } else {
+            let newRecord = TrackerRecord(trackerId: tracker.id, date: Calendar.current.startOfDay(for: selectedDate))
+            try? recordStore.addRecord(newRecord)
+            completedTrackers.append(newRecord)
+        }
 
-            for (sectionIndex, category) in visibleCategories.enumerated() {
-                if let itemIndex = category.trackers.firstIndex(where: { $0.id == tracker.id }) {
-                    let indexPath = IndexPath(item: itemIndex, section: sectionIndex)
-                    collectionView.reloadItems(at: [indexPath])
-                    break
-                }
-            }
+        updateVisibleTrackers()
+        collectionView.reloadData()
     }
     
     private func presentDeleteTrackerConfirmation(for trackerId: UUID) {
@@ -335,6 +357,25 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         updateVisibleTrackers()
         collectionView.reloadData()
         updateEmptyStateVisibility()
+    }
+}
+
+// MARK: - FiltersViewControllerDelegate
+extension TrackersViewController: FiltersViewControllerDelegate {
+    func filtersViewController(
+        _ viewController: FiltersViewController,
+        didSelect filter: TrackerFilter
+    ) {
+        switch filter {
+        case .all:
+            activeFilter = .all
+        case .today:
+            selectedDate = Date()
+            activeFilter = nil
+        case .completed, .uncompleted:
+            activeFilter = filter
+        }
+        updateVisibleTrackers()
     }
 }
 
