@@ -25,6 +25,21 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         static let collectionBottomExtraInset: CGFloat = 8
     }
     
+    // MARK: - Analytics
+    private let analytics = AnalyticsService()
+    
+    private func reportMain(event: String, screen: String, item: String? = nil) {
+        var params = [
+            "event": event,
+            "screen": screen
+        ]
+        if let item {
+            params["item"] = item
+        }
+        print("Analytics -> event=\(event), params=\(params)")
+        analytics.report(event: event, params: params)
+    }
+    
     // MARK: - UI Elements
     private lazy var emptyStateImageView: UIImageView = {
         let imageView = UIImageView()
@@ -121,8 +136,20 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         adjustCollectionInsets()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        reportMain(event: "open", screen: "Main")
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        reportMain(event: "close", screen: "Main")
+    }
+    
     // MARK: - Actions
-    @objc private func addTrackerTapped() {        
+    @objc private func addTrackerTapped() {
+        reportMain(event: "click", screen: "Main", item: "add_track")
+        
         let creator = NewTrackerViewController(categoryStore: categoryStore)
         creator.delegate = self
         
@@ -137,6 +164,8 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     }
     
     @objc private func filtersTapped() {
+        reportMain(event: "click", screen: "Main", item: "filter")
+        
         let selectedForList: TrackerFilter? = (activeFilter == .completed || activeFilter == .uncompleted) ? activeFilter : nil
         let filtersViewController = FiltersViewController(selected: selectedForList)
         filtersViewController.delegate = self
@@ -312,6 +341,8 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     }
     
     private func toggleTrackerCompletion(_ tracker: Tracker) {
+        reportMain(event: "click", screen: "Main", item: "track")
+        
         guard selectedDate <= Date() else { return }
 
         if let record = recordStore.record(for: tracker.id, on: selectedDate) {
@@ -485,6 +516,8 @@ extension TrackersViewController: UICollectionViewDataSource {
             guard let self else { return nil }
             
             let edit = UIAction(title: NSLocalizedString("edit.action", comment: "Edit action title")) { _ in
+                self.reportMain(event: "click", screen: "Main", item: "edit")
+                
                 let completedCount = self.completedTrackers.filter { $0.trackerId == tracker.id }.count
                 let editor = NewTrackerViewController(
                     categoryStore: self.categoryStore,
@@ -500,6 +533,8 @@ extension TrackersViewController: UICollectionViewDataSource {
             }
             
             let delete = UIAction(title: NSLocalizedString("delete.action", comment: "Delete action title"), attributes: .destructive) { _ in
+                self.reportMain(event: "click", screen: "Main", item: "delete")
+                
                 self.presentDeleteTrackerConfirmation(for: tracker.id)
             }
             return UIMenu(children: [edit, delete])

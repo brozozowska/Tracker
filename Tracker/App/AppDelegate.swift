@@ -31,6 +31,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         DaysValueTransformer.register()
         UIColorTransformer.register()
         
+        AnalyticsService.activate()
+        
         return true
     }
 
