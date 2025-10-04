@@ -52,8 +52,6 @@ final class StatisticsCell: UITableViewCell {
         return stack
     }()
     
-    // MARK: - Layers
-    private var gradientLayer: CAGradientLayer?
     
     // MARK: - Initializers
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -80,40 +78,10 @@ final class StatisticsCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         contentView.layoutIfNeeded()
-        applyGradientBorder(to: container)
+        GradientBorder.apply(to: container)
     }
     
     // MARK: - Setup Methods
-    private func applyGradientBorder(to view: UIView) {
-        if gradientLayer == nil {
-            let gradient = CAGradientLayer()
-            gradient.colors = [
-                UIColor(red: 253/255, green: 76/255, blue: 73/255, alpha: 1).cgColor,
-                UIColor(red: 70/255, green: 230/255, blue: 157/255, alpha: 1).cgColor,
-                UIColor(red: 0/255, green: 123/255, blue: 250/255, alpha: 1).cgColor
-            ]
-            gradient.startPoint = CGPoint(x: 0, y: 0.5)
-            gradient.endPoint   = CGPoint(x: 1, y: 0.5)
-            
-            let shape = CAShapeLayer()
-            shape.lineWidth = UIConstants.borderWidth * 2
-            shape.fillColor = UIColor.clear.cgColor
-            shape.strokeColor = UIColor.black.cgColor
-            gradient.mask = shape
-            
-            view.layer.addSublayer(gradient)
-            gradientLayer = gradient
-        }
-        
-        gradientLayer?.frame = view.bounds
-        if let shape = gradientLayer?.mask as? CAShapeLayer {
-            shape.path = UIBezierPath(
-                roundedRect: view.bounds.insetBy(dx: UIConstants.borderWidth, dy: UIConstants.borderWidth),
-                cornerRadius: UIConstants.cornerRadius
-            ).cgPath
-        }
-    }
-    
     private func setupUI() {
         container.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(container)

@@ -279,6 +279,14 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         
         updateEmptyStateVisibility()
         collectionView.reloadData()
+        
+        let isFilterActive = (activeFilter == .completed || activeFilter == .uncompleted)
+
+        if isFilterActive {
+            GradientBorder.apply(to: filtersButton, cornerRadius: UIConstants.filterButtonCornerRadius)
+        } else {
+            GradientBorder.remove(from: filtersButton)
+        }
     }
     
     private func updateEmptyStateVisibility() {
