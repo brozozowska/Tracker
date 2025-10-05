@@ -16,7 +16,13 @@ struct Statistics {
     static let zero = Statistics(bestPeriod: 0, perfectDays: 0, completedTotal: 0, averagePerActiveDay: 0)
 }
 
-final class StatisticsService {
+// MARK: - Protocol
+protocol StatisticsServiceProtocol {
+    func compute() -> Statistics
+}
+
+// MARK: - StatisticsService
+final class StatisticsService: StatisticsServiceProtocol {
     
     // MARK: - Dependencies
     private let trackerStore: TrackerStore

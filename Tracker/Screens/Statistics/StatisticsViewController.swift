@@ -68,15 +68,38 @@ final class StatisticsViewController: UIViewController {
     }()
     
     // MARK: - Stores & Service
-    private let trackerStore = TrackerStore()
-    private let recordStore = TrackerRecordStore()
-    private lazy var statisticsService = StatisticsService(
-        trackerStore: trackerStore,
-        recordStore: recordStore
-    )
+    private let trackerStore: TrackerStore
+    private let recordStore: TrackerRecordStore
+    private let statisticsService: StatisticsServiceProtocol
     
     // MARK: - State
     private var stats: Statistics = .zero
+    
+    // MARK: - Initializers
+    convenience init() {
+        let trackerStore = TrackerStore()
+        let recordStore = TrackerRecordStore()
+        let service = StatisticsService(trackerStore: trackerStore, recordStore: recordStore)
+        self.init(statisticsService: service, trackerStore: trackerStore, recordStore: recordStore)
+    }
+    
+    init(
+        statisticsService: StatisticsServiceProtocol,
+        trackerStore: TrackerStore,
+        recordStore: TrackerRecordStore
+    ) {
+        self.statisticsService = statisticsService
+        self.trackerStore = trackerStore
+        self.recordStore = recordStore
+        super.init(nibName: nil, bundle: nil)
+        
+        trackerStore.delegate = self
+        recordStore.delegate = self
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) not implemented")
+    }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -87,9 +110,6 @@ final class StatisticsViewController: UIViewController {
         setupNavigationBar()
         addSubviews()
         setupLayout()
-        
-        trackerStore.delegate = self
-        recordStore.delegate = self
         
         recomputeAndReload()
     }
