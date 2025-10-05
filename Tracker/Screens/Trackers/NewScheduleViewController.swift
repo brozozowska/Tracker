@@ -143,11 +143,9 @@ extension NewScheduleViewController: UITableViewDataSource {
         )
         cell.switchChanged = { [weak self] isOn in
             guard let self = self else { return }
-            if isOn {
-                self.selectedSchedule.append(day)
-            } else {
-                self.selectedSchedule.removeAll { $0 == day }
-            }
+            isOn
+            ? self.selectedSchedule.append(day)
+            : self.selectedSchedule.removeAll { $0 == day }
         }
         return cell
     }

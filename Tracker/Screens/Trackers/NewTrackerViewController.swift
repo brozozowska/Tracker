@@ -554,13 +554,9 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         && selectedColor != nil
         
         createButton.isEnabled = isValid
-        if isValid {
-            createButton.backgroundColor = .label
-            createButton.setTitleColor(.systemBackground, for: .normal)
-        } else {
-            createButton.backgroundColor = .lightGray
-            createButton.setTitleColor(.white, for: .normal)
-        }
+        
+        createButton.backgroundColor = isValid ? .label : .lightGray
+        createButton.setTitleColor(isValid ? .systemBackground : .white, for: .normal)
     }
     
     // MARK: - NewScheduleViewControllerDelegate

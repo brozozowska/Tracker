@@ -310,34 +310,26 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
         collectionView.reloadData()
         
         let isFilterActive = (activeFilter == .completed || activeFilter == .uncompleted)
-
-        if isFilterActive {
-            GradientBorder.apply(to: filtersButton, cornerRadius: UIConstants.filterButtonCornerRadius)
-        } else {
-            GradientBorder.remove(from: filtersButton)
-        }
+        isFilterActive
+            ? GradientBorder.apply(to: filtersButton, cornerRadius: UIConstants.filterButtonCornerRadius)
+            : GradientBorder.remove(from: filtersButton)
     }
     
     private func updateEmptyStateVisibility() {
         let isEmpty = visibleCategories.isEmpty
         let isSearchActive = !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         let isFilterActive = (activeFilter == .completed || activeFilter == .uncompleted)
-        
-        if isEmpty {
-            emptyStateImageView.isHidden = false
-            emptyStateLabel.isHidden = false
-            
-            if isSearchActive || isFilterActive {
-                emptyStateImageView.image = UIImage(resource: .emptySearch)
-                emptyStateLabel.text = NSLocalizedString("trackers.search.empty.title", comment: "Nothing found empty state label")
-            } else {
-                emptyStateImageView.image = UIImage(resource: .empty)
-                emptyStateLabel.text = NSLocalizedString("trackers.empty.title", comment: "Empty state label text on trackers screen")
-            }
-        } else {
-            emptyStateImageView.isHidden = true
-            emptyStateLabel.isHidden = true
-        }
+        let useSearchAssets = isSearchActive || isFilterActive
+
+        emptyStateImageView.isHidden = !isEmpty
+        emptyStateLabel.isHidden = !isEmpty
+
+        emptyStateImageView.image = useSearchAssets
+            ? UIImage(resource: .emptySearch)
+            : UIImage(resource: .empty)
+        emptyStateLabel.text = useSearchAssets
+            ? NSLocalizedString("trackers.search.empty.title", comment: "Nothing found empty state label")
+            : NSLocalizedString("trackers.empty.title", comment: "Empty state label text on trackers screen")
     }
     
     private func toggleTrackerCompletion(_ tracker: Tracker) {
