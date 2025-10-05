@@ -23,8 +23,8 @@ final class TabBarController: UITabBarController {
         tabBar.standardAppearance = appearance
         tabBar.scrollEdgeAppearance = appearance
         
-        let trackersTitle = NSLocalizedString("tab.trackers.title", comment: "Trackers tab title")
-        let statisticsTitle = NSLocalizedString("tab.statistics.title", comment: "Statistics tab title")
+        let trackersTitle = Localizable.Tabs.trackers
+        let statisticsTitle = Localizable.Tabs.statistics
         
         let trackersViewController = TrackersViewController()
         let trackersNav = UINavigationController(rootViewController: trackersViewController)

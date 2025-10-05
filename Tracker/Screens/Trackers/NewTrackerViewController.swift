@@ -83,7 +83,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = NSLocalizedString("new_tracker.name.placeholder", comment: "Placeholder for tracker name")
+        textField.placeholder = Localizable.NewTracker.namePlaceholder
         textField.borderStyle = .none
         textField.clearButtonMode = .whileEditing
         textField.returnKeyType = .done
@@ -121,7 +121,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
-        label.text = NSLocalizedString("emoji.title", comment: "Emoji section title")
+        label.text = Localizable.NewTracker.emojiTitle
         label.font = .systemFont(ofSize: 19, weight: .bold)
         label.textColor = .label
         return label
@@ -151,7 +151,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
     private lazy var colorLabel: UILabel = {
         let label = UILabel()
-        label.text = NSLocalizedString("color.title", comment: "Color section title")
+        label.text = Localizable.NewTracker.colorTitle
         label.font = .systemFont(ofSize: 19, weight: .bold)
         label.textColor = .label
         return label
@@ -180,7 +180,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(NSLocalizedString("cancel.action", comment: "Cancel action"), for: .normal)
+        button.setTitle(Localizable.Actions.cancel, for: .normal)
         button.setTitleColor(.systemRed, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
         button.layer.borderWidth = 1
@@ -190,7 +190,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(NSLocalizedString("create.action", comment: "Create action"), for: .normal)
+        button.setTitle(Localizable.Actions.create, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
         button.backgroundColor = .lightGray
         button.setTitleColor(.white, for: .normal)
@@ -284,15 +284,12 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
         switch mode {
         case .create:
-            navigationItem.title = NSLocalizedString("new_tracker.title", comment: "New tracker screen title")
+            navigationItem.title = Localizable.NewTracker.title
         case .edit:
-            navigationItem.title = NSLocalizedString("edit_tracker.title", comment: "Edit tracker screen title")
+            navigationItem.title = Localizable.NewTracker.editTitle
             vStack.insertArrangedSubview(daysLabel, at: 0)
-            daysLabel.text = String.localizedStringWithFormat(
-                NSLocalizedString("tracker.days.count", comment: "Completed days count"),
-                completedDaysCount
-            )
-            createButton.setTitle(NSLocalizedString("save.action", comment: "Save action"), for: .normal)
+            daysLabel.text = Localizable.Tracker.daysCount(completedDaysCount)
+            createButton.setTitle(Localizable.Actions.save, for: .normal)
         }
 
         view.backgroundColor = .systemBackground
@@ -303,8 +300,8 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         setupConstraints()
         setupActions()
         
-        categoryOption.setTitle(NSLocalizedString("category.title", comment: "Category option title"))
-        scheduleOption.setTitle(NSLocalizedString("schedule.title", comment: "Schedule option title"))
+        categoryOption.setTitle(Localizable.NewTracker.categoryTitle)
+        scheduleOption.setTitle(Localizable.NewTracker.scheduleTitle)
         
         nameTextField.text = trackerTitle
         

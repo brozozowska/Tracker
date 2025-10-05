@@ -13,12 +13,12 @@ final class OnboardingViewController: UIPageViewController {
     private lazy var pages: [UIViewController] = {
         let page1 = OnboardingPageViewController(
             backgroundImage: UIImage(resource: .background1),
-            text: NSLocalizedString("onboarding.page1.text", comment: "First onboarding page text")
+            text: Localizable.Onboarding.page1Text
         )
         
         let page2 = OnboardingPageViewController(
             backgroundImage: UIImage(resource: .background2),
-            text: NSLocalizedString("onboarding.page2.text", comment: "Second onboarding page text")
+            text: Localizable.Onboarding.page2Text
         )
         
         return [page1, page2]
@@ -35,7 +35,7 @@ final class OnboardingViewController: UIPageViewController {
     
     private lazy var actionButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(NSLocalizedString("onboarding.action.title", comment: "Onboarding primary action title"), for: .normal)
+        button.setTitle(Localizable.Onboarding.actionTitle, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .black
         button.layer.cornerRadius = 16

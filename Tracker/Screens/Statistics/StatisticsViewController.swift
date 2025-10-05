@@ -28,13 +28,13 @@ final class StatisticsViewController: UIViewController {
         var title: String {
             switch self {
             case .bestPeriod:
-                NSLocalizedString("statistics.best_period", comment: "Best period metric title")
+                Localizable.Statistics.bestPeriod
             case .perfectDays:
-                NSLocalizedString("statistics.perfect_days", comment: "Perfect days metric title")
+                Localizable.Statistics.perfectDays
             case .completedTotal:
-                NSLocalizedString("statistics.completed_total", comment: "Completed trackers total metric title")
+                Localizable.Statistics.completedTotal
             case .averagePerDay:
-                NSLocalizedString("statistics.average_per_day", comment: "Average per active day metric title")
+                Localizable.Statistics.averagePerDay
             }
         }
     }
@@ -60,7 +60,7 @@ final class StatisticsViewController: UIViewController {
     
     private lazy var emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = NSLocalizedString("statistics.empty.title", comment: "Statistics empty state text")
+        label.text = Localizable.Statistics.emptyTitle
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textAlignment = .center
         label.textColor = .label
@@ -116,7 +116,7 @@ final class StatisticsViewController: UIViewController {
     
     // MARK: - Setup Methods
     private func setupNavigationBar() {
-        navigationItem.title = NSLocalizedString("statistics.title", comment: "Statistics screen title")
+        navigationItem.title = Localizable.Statistics.title
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
     }

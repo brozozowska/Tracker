@@ -16,13 +16,13 @@ enum TrackerFilter: CaseIterable {
     var title: String {
         switch self {
         case .all:
-            NSLocalizedString("filters.all", comment: "All trackers")
+            Localizable.Filters.all
         case .today:
-            NSLocalizedString("filters.today", comment: "Trackers for today")
+            Localizable.Filters.today
         case .completed:
-            NSLocalizedString("filters.completed", comment: "Completed trackers")
+            Localizable.Filters.completed
         case .uncompleted:
-            NSLocalizedString("filters.uncompleted", comment: "Uncompleted trackers")
+            Localizable.Filters.uncompleted
         }
     }
 }

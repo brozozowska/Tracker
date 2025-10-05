@@ -134,7 +134,7 @@ final class TrackerCategoryStore: NSObject {
     }
     
     func deleteCategory(withTitle title: String) throws {
-        let uncategorizedTitle = NSLocalizedString("category.uncategorized.title", comment: "Title for 'No category'")
+        let uncategorizedTitle = Localizable.Categories.uncategorizedTitle
         
         if title == uncategorizedTitle {
             if let object = fetchCategoryObject(withTitle: title),

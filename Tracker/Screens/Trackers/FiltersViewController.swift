@@ -55,7 +55,7 @@ final class FiltersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        navigationItem.title = NSLocalizedString("filters.title", comment: "Filters screen title")
+        navigationItem.title = Localizable.Filters.title
         
         setupLayout()
     }

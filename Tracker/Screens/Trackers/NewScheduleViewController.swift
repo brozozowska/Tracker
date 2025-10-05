@@ -39,7 +39,7 @@ final class NewScheduleViewController: UIViewController {
     
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(NSLocalizedString("done.action", comment: "Done button title"), for: .normal)
+        button.setTitle(Localizable.Actions.done, for: .normal)
         button.backgroundColor = .label
         button.setTitleColor(.systemBackground, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
@@ -67,7 +67,7 @@ final class NewScheduleViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        navigationItem.title = NSLocalizedString("schedule.title", comment: "Schedule screen title")
+        navigationItem.title = Localizable.Schedule.screenTitle
         
         setupTableView()
         setupSubviews()

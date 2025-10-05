@@ -50,7 +50,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     private lazy var emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = NSLocalizedString("trackers.empty.title", comment: "Empty state label text on trackers screen")
+        label.text = Localizable.Trackers.emptyTitle
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textAlignment = .center
         label.textColor = .label
@@ -59,7 +59,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar(frame: .zero)
-        searchBar.placeholder = NSLocalizedString("search.placeholder", comment: "Search placeholder")
+        searchBar.placeholder = Localizable.Search.placeholder
         searchBar.searchBarStyle = .minimal
         searchBar.autocapitalizationType = .none
         searchBar.returnKeyType = .search
@@ -75,7 +75,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     private lazy var filtersButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(NSLocalizedString("filters.title", comment: "Filters button title"), for: .normal)
+        button.setTitle(Localizable.Filters.title, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .systemBlue
         button.layer.cornerRadius = UIConstants.filterButtonCornerRadius
@@ -185,7 +185,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     
     // MARK: - Setup Methods
     private func setupNavigationBar() {
-        navigationItem.title = NSLocalizedString("trackers.title", comment: "Trackers screen title")
+        navigationItem.title = Localizable.Trackers.title
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.largeTitleDisplayMode = .always
         
@@ -328,8 +328,8 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
             ? UIImage(resource: .emptySearch)
             : UIImage(resource: .empty)
         emptyStateLabel.text = useSearchAssets
-            ? NSLocalizedString("trackers.search.empty.title", comment: "Nothing found empty state label")
-            : NSLocalizedString("trackers.empty.title", comment: "Empty state label text on trackers screen")
+            ? Localizable.Trackers.searchEmptyTitle
+            : Localizable.Trackers.emptyTitle
     }
     
     private func toggleTrackerCompletion(_ tracker: Tracker) {
@@ -353,7 +353,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     private func presentDeleteTrackerConfirmation(for trackerId: UUID) {
         BottomConfirmViewController.present(
             from: self,
-            message: NSLocalizedString("trackers.delete.confirm.message", comment: "Confirm tracker deletion message"),
+            message: Localizable.Trackers.deleteConfirmMessage,
             onConfirm: { [weak self] in
                 guard let self else { return }
                 do {
@@ -507,7 +507,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         return UIContextMenuConfiguration(identifier: indexPath as NSIndexPath, previewProvider: nil) { [weak self] _ in
             guard let self else { return nil }
             
-            let edit = UIAction(title: NSLocalizedString("edit.action", comment: "Edit action title")) { _ in
+            let edit = UIAction(title: Localizable.Actions.edit) { _ in
                 self.reportMain(event: "click", screen: "Main", item: "edit")
                 
                 let completedCount = self.completedTrackers.filter { $0.trackerId == tracker.id }.count
@@ -524,7 +524,7 @@ extension TrackersViewController: UICollectionViewDataSource {
                 self.present(nav, animated: true)
             }
             
-            let delete = UIAction(title: NSLocalizedString("delete.action", comment: "Delete action title"), attributes: .destructive) { _ in
+            let delete = UIAction(title: Localizable.Actions.delete, attributes: .destructive) { _ in
                 self.reportMain(event: "click", screen: "Main", item: "delete")
                 
                 self.presentDeleteTrackerConfirmation(for: tracker.id)

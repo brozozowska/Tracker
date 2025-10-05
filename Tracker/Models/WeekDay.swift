@@ -17,11 +17,11 @@ enum WeekDay: String, CaseIterable, Codable {
         case sunday = "weekday.sunday"
     
     var longName: String {
-        NSLocalizedString("\(rawValue).long", comment: "Full weekday name")
+        Localizable.Weekday.long(self)
     }
     
     var shortName: String {
-        NSLocalizedString("\(rawValue).short", comment: "Short weekday name")
+        Localizable.Weekday.short(self)
     }
     
     static var workdays: [WeekDay] {
@@ -48,11 +48,11 @@ extension Array where Element == WeekDay {
         let selected = Set(self)
         
         if selected == allDays {
-            return NSLocalizedString("schedule.everyday", comment: "Every day")
+            return Localizable.Schedule.everyday
         } else if selected == workdays {
-            return NSLocalizedString("schedule.workdays", comment: "Workdays")
+            return Localizable.Schedule.workdays
         } else if selected == weekend {
-            return NSLocalizedString("schedule.weekend", comment: "Weekend")
+            return Localizable.Schedule.weekend
         } else {
             let sortedDays = WeekDay.allCases.filter { selected.contains($0) }
             let names = sortedDays.map { $0.shortName }

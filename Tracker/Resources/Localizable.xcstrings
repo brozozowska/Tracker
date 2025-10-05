@@ -2,7 +2,7 @@
   "sourceLanguage" : "en",
   "strings" : {
     "cancel.action" : {
-      "comment" : "Cancel action\nCancel action title",
+      "comment" : "Cancel action",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -121,7 +121,7 @@
       }
     },
     "delete_category.confirm_message" : {
-      "comment" : "Confirm delete category\nDefault confirm message for deleting category",
+      "comment" : "Confirm delete category",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -138,7 +138,7 @@
       }
     },
     "delete.action" : {
-      "comment" : "Delete action\nDelete action title",
+      "comment" : "Delete action",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -155,7 +155,7 @@
       }
     },
     "done.action" : {
-      "comment" : "Done action\nDone button title",
+      "comment" : "Done button",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -206,7 +206,7 @@
       }
     },
     "edit.action" : {
-      "comment" : "Edit action\nEdit action title",
+      "comment" : "Edit action",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -274,7 +274,7 @@
       }
     },
     "filters.title" : {
-      "comment" : "Filters button title\nFilters screen title",
+      "comment" : "Filters title",
       "localizations" : {
         "en" : {
           "stringUnit" : {
