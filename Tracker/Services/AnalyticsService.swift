@@ -9,6 +9,10 @@ import Foundation
 import AppMetricaCore
 
 struct AnalyticsService {
+    static let shared = AnalyticsService()
+    
+    private init() {}
+    
     static func activate() {
         guard let configuration = AppMetricaConfiguration(apiKey: "d9c544e9-d3a0-4fbb-b299-463cf288be07") else { return }
         AppMetrica.activate(with: configuration)

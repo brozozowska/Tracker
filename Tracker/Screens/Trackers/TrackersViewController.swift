@@ -26,7 +26,7 @@ final class TrackersViewController: UIViewController, NewTrackerViewControllerDe
     }
     
     // MARK: - Analytics
-    private let analytics = AnalyticsService()
+    private let analytics = AnalyticsService.shared
     
     private func reportMain(event: String, screen: String, item: String? = nil) {
         var params = [
