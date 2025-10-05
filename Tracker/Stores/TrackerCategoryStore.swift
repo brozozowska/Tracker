@@ -82,7 +82,7 @@ final class TrackerCategoryStore: NSObject {
     }
     
     func category(withTitle title: String) -> TrackerCategory? {
-        return fetchCategories().first { $0.title == title }
+        fetchCategories().first { $0.title == title }
     }
     
     func fetchCategoryObject(withTitle title: String) -> TrackerCategoryCoreData? {

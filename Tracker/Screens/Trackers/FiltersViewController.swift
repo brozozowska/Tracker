@@ -17,7 +17,7 @@ final class FiltersViewController: UIViewController {
     
     // MARK: - UI Constants
     private enum UIConstants {
-        static let TopOffset: CGFloat = 24
+        static let topOffset: CGFloat = 24
         static let horizontalInset: CGFloat = 16
         static let rowHeight: CGFloat = 75
         static let cornerRadius: CGFloat = 16
@@ -64,7 +64,7 @@ final class FiltersViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(tableView)
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: UIConstants.TopOffset),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: UIConstants.topOffset),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.horizontalInset),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.horizontalInset),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
@@ -127,6 +127,5 @@ extension FiltersViewController: UITableViewDelegate {
 
 // MARK: - Preview
 #Preview {
-    let viewController = FiltersViewController()
-    return viewController
+    FiltersViewController()
 }

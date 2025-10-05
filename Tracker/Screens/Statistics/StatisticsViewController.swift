@@ -28,13 +28,13 @@ final class StatisticsViewController: UIViewController {
         var title: String {
             switch self {
             case .bestPeriod:
-                return NSLocalizedString("statistics.best_period", comment: "Best period metric title")
+                NSLocalizedString("statistics.best_period", comment: "Best period metric title")
             case .perfectDays:
-                return NSLocalizedString("statistics.perfect_days", comment: "Perfect days metric title")
+                NSLocalizedString("statistics.perfect_days", comment: "Perfect days metric title")
             case .completedTotal:
-                return NSLocalizedString("statistics.completed_total", comment: "Completed trackers total metric title")
+                NSLocalizedString("statistics.completed_total", comment: "Completed trackers total metric title")
             case .averagePerDay:
-                return NSLocalizedString("statistics.average_per_day", comment: "Average per active day metric title")
+                NSLocalizedString("statistics.average_per_day", comment: "Average per active day metric title")
             }
         }
     }
@@ -150,7 +150,7 @@ extension StatisticsViewController: UITableViewDataSource {
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        return Metric.allCases.count
+        Metric.allCases.count
     }
     
     func tableView(

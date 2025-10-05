@@ -228,6 +228,5 @@ extension BottomConfirmViewController {
 
 // MARK: - Preview
 #Preview {
-    let viewController = BottomConfirmViewController()
-    return viewController
+    BottomConfirmViewController()
 }

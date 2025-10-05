@@ -330,6 +330,5 @@ extension CategoryListViewController: UITableViewDelegate {
 
 // MARK: - Preview
 #Preview {
-    let viewController = CategoryListViewController()
-    return viewController
+    CategoryListViewController()
 }

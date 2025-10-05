@@ -600,11 +600,11 @@ extension NewTrackerViewController: UICollectionViewDataSource {
     ) -> Int {
         switch collectionView {
         case emojiCollectionView:
-            return emojis.count
+            emojis.count
         case colorCollectionView:
-            return colors.count
+            colors.count
         default:
-            return 0
+            0
         }
     }
     
@@ -671,7 +671,7 @@ extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         insetForSectionAt section: Int
     ) -> UIEdgeInsets {
-        return UIEdgeInsets(
+        UIEdgeInsets(
             top: UIConstants.collectionViewVerticalInset,
             left: 0,
             bottom: UIConstants.collectionViewVerticalInset,
@@ -684,7 +684,7 @@ extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
-        return UIConstants.collectionCellSize
+        UIConstants.collectionCellSize
     }
     
     func collectionView(

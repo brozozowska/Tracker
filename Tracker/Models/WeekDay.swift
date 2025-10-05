@@ -25,11 +25,11 @@ enum WeekDay: String, CaseIterable, Codable {
     }
     
     static var workdays: [WeekDay] {
-        return [.monday, .tuesday, .wednesday, .thursday, .friday]
+        [.monday, .tuesday, .wednesday, .thursday, .friday]
     }
     
     static var weekend: [WeekDay] {
-        return [.saturday, .sunday]
+        [.saturday, .sunday]
     }
 }
 

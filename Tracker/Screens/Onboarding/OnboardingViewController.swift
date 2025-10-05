@@ -136,6 +136,5 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
 
 // MARK: - Preview
 #Preview {
-    let viewController = OnboardingViewController()
-    return viewController
+    OnboardingViewController()
 }
