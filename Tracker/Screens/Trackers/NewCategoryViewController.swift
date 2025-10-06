@@ -21,14 +21,14 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     // MARK: - UI Elements
     private lazy var nameContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemGray6
+        view.backgroundColor = UIColor.secondarySystemBackground
         view.layer.cornerRadius = UIConstants.cornerRadius
         return view
     }()
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = Localizable.CategoryEditor.namePlaceholder
         textField.borderStyle = .none
         textField.clearButtonMode = .whileEditing
         textField.returnKeyType = .done
@@ -42,7 +42,7 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(Localizable.Actions.done, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
         button.backgroundColor = .lightGray
         button.setTitleColor(.white, for: .normal)
@@ -71,7 +71,9 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        navigationItem.title = initialTitle == nil ? "Новая категория" : "Редактирование категории"
+        navigationItem.title = initialTitle == nil
+        ? Localizable.CategoryEditor.newTitle
+        : Localizable.CategoryEditor.editTitle
         
         setupSubviews()
         setupConstraints()
@@ -119,7 +121,9 @@ final class NewCategoryViewController: UIViewController, UITextFieldDelegate {
         let trimmed = (nameTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         let enabled = !trimmed.isEmpty
         doneButton.isEnabled = enabled
-        doneButton.backgroundColor = enabled ? .black : .lightGray
+        
+        doneButton.backgroundColor = enabled ? .label : .lightGray
+        doneButton.setTitleColor(enabled ? .systemBackground : .white, for: .normal)
     }
     
     @objc private func dismissKeyboard() {

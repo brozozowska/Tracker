@@ -20,7 +20,7 @@ final class BottomConfirmViewController: UIViewController {
         static let cancelButtonTopSpacing: CGFloat = 8
         static let contentBottomInset: CGFloat = 8
         static let backgroundDimAlpha: CGFloat = 0.4
-        static let confirmAlpha: CGFloat = 0.6
+        static let confirmAlpha: CGFloat = 0.8
         static let presentDuration: TimeInterval = 0.15
         static let dismissDuration: TimeInterval = 0.15
     }
@@ -47,7 +47,9 @@ final class BottomConfirmViewController: UIViewController {
 
     private lazy var confirmContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.white.withAlphaComponent(UIConstants.confirmAlpha)
+        view.backgroundColor = UIColor { trait in
+            trait.userInterfaceStyle == .dark ? .secondarySystemBackground : UIColor.white.withAlphaComponent(UIConstants.confirmAlpha)
+        }
         view.layer.cornerRadius = UIConstants.cornerRadius
         view.layer.masksToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -66,14 +68,14 @@ final class BottomConfirmViewController: UIViewController {
 
     private lazy var divider: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemGray2
+        view.backgroundColor = .separator
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
 
     private lazy var confirmButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Удалить", for: .normal)
+        button.setTitle(Localizable.Actions.delete, for: .normal)
         button.setTitleColor(.systemRed, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .regular)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -83,10 +85,12 @@ final class BottomConfirmViewController: UIViewController {
 
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(Localizable.Actions.cancel, for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
-        button.backgroundColor = .systemBackground
+        button.backgroundColor = UIColor { trait in
+            trait.userInterfaceStyle == .dark ? .secondarySystemBackground : .systemBackground
+        }
         button.layer.cornerRadius = UIConstants.cornerRadius
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
@@ -101,7 +105,7 @@ final class BottomConfirmViewController: UIViewController {
     private let message: String
 
     // MARK: - Initializers
-    init(message: String = "Эта категория точно не нужна?") {
+    init(message: String = Localizable.Categories.deleteConfirm) {
         self.message = message
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = .overFullScreen
@@ -224,6 +228,5 @@ extension BottomConfirmViewController {
 
 // MARK: - Preview
 #Preview {
-    let viewController = BottomConfirmViewController()
-    return viewController
+    BottomConfirmViewController()
 }

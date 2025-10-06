@@ -8,32 +8,35 @@
 import Foundation
 
 enum WeekDay: String, CaseIterable, Codable {
-    case monday = "Понедельник"
-    case tuesday = "Вторник"
-    case wednesday = "Среда"
-    case thursday = "Четверг"
-    case friday = "Пятница"
-    case saturday = "Суббота"
-    case sunday = "Воскресенье"
+    case monday = "weekday.monday"
+        case tuesday = "weekday.tuesday"
+        case wednesday = "weekday.wednesday"
+        case thursday = "weekday.thursday"
+        case friday = "weekday.friday"
+        case saturday = "weekday.saturday"
+        case sunday = "weekday.sunday"
+    
+    var longName: String {
+        Localizable.Weekday.long(self)
+    }
     
     var shortName: String {
-        switch self {
-        case .monday: return "Пн"
-        case .tuesday: return "Вт"
-        case .wednesday: return "Ср"
-        case .thursday: return "Чт"
-        case .friday: return "Пт"
-        case .saturday: return "Сб"
-        case .sunday: return "Вс"
-        }
+        Localizable.Weekday.short(self)
     }
     
     static var workdays: [WeekDay] {
-        return [.monday, .tuesday, .wednesday, .thursday, .friday]
+        [.monday, .tuesday, .wednesday, .thursday, .friday]
     }
     
     static var weekend: [WeekDay] {
-        return [.saturday, .sunday]
+        [.saturday, .sunday]
+    }
+}
+
+extension WeekDay {
+    init(from date: Date, calendar: Calendar = .current) {
+        let index = (calendar.component(.weekday, from: date) + 5) % 7
+        self = WeekDay.allCases[index]
     }
 }
 
@@ -45,14 +48,15 @@ extension Array where Element == WeekDay {
         let selected = Set(self)
         
         if selected == allDays {
-            return "Каждый день"
+            return Localizable.Schedule.everyday
         } else if selected == workdays {
-            return "Будние дни"
+            return Localizable.Schedule.workdays
         } else if selected == weekend {
-            return "Выходные"
+            return Localizable.Schedule.weekend
         } else {
             let sortedDays = WeekDay.allCases.filter { selected.contains($0) }
-            return sortedDays.map { $0.shortName }.joined(separator: ", ")
+            let names = sortedDays.map { $0.shortName }
+            return ListFormatter.localizedString(byJoining: names)
         }
     }
 }

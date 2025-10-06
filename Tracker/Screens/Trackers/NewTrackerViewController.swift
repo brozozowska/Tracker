@@ -14,10 +14,22 @@ protocol NewTrackerViewControllerDelegate: AnyObject {
         didCreate tracker: Tracker,
         in categoryTitle: String
     )
+    
+    func newTrackerViewController(
+        _ viewController: NewTrackerViewController,
+        didUpdate tracker: Tracker,
+        movedTo categoryTitle: String
+    )
 }
 
 // MARK: - NewTrackerViewController
 final class NewTrackerViewController: UIViewController, NewScheduleViewControllerDelegate, CategoryListViewControllerDelegate {
+
+    // MARK: - Mode
+    enum Mode {
+        case create
+        case edit(tracker: Tracker, categoryTitle: String, completedDays: Int)
+    }
 
     // MARK: - Constants
     private enum UIConstants {
@@ -54,28 +66,37 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         return stack
     }()
 
+    private lazy var daysLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.textColor = .label
+        label.font = .systemFont(ofSize: 32, weight: .bold)
+        return label
+    }()
+
     private lazy var nameContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemGray6
+        view.backgroundColor = .secondarySystemBackground
         view.layer.cornerRadius = UIConstants.cornerRadius
         return view
     }()
 
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        textField.placeholder = Localizable.NewTracker.namePlaceholder
         textField.borderStyle = .none
         textField.clearButtonMode = .whileEditing
         textField.returnKeyType = .done
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .sentences
         textField.font = .systemFont(ofSize: 17)
+        textField.textColor = .label
         return textField
     }()
 
     private lazy var optionsContainer: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemGray6
+        view.backgroundColor = .secondarySystemBackground
         view.layer.cornerRadius = UIConstants.cornerRadius
         return view
     }()
@@ -84,7 +105,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     
     private lazy var divider: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.systemGray4
+        view.backgroundColor = .separator
         return view
     }()
     
@@ -100,7 +121,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     
     private lazy var emojiLabel: UILabel = {
         let label = UILabel()
-        label.text = "Emoji"
+        label.text = Localizable.NewTracker.emojiTitle
         label.font = .systemFont(ofSize: 19, weight: .bold)
         label.textColor = .label
         return label
@@ -130,7 +151,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
     private lazy var colorLabel: UILabel = {
         let label = UILabel()
-        label.text = "Цвет"
+        label.text = Localizable.NewTracker.colorTitle
         label.font = .systemFont(ofSize: 19, weight: .bold)
         label.textColor = .label
         return label
@@ -159,7 +180,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(Localizable.Actions.cancel, for: .normal)
         button.setTitleColor(.systemRed, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
         button.layer.borderWidth = 1
@@ -169,7 +190,7 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
 
     private lazy var createButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Создать", for: .normal)
+        button.setTitle(Localizable.Actions.create, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
         button.backgroundColor = .lightGray
         button.setTitleColor(.white, for: .normal)
@@ -181,6 +202,10 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     weak var delegate: NewTrackerViewControllerDelegate?
 
     // MARK: - Private Properties
+    private let mode: Mode
+    private var trackerToEdit: Tracker?
+    private var completedDaysCount: Int = 0
+
     private var trackerTitle: String = ""
     private var selectedSchedule: [WeekDay] = []
     private var selectedCategory: String = ""
@@ -229,9 +254,24 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     private let categoryStore: TrackerCategoryStore
 
     // MARK: - Initializers
-    init(categoryStore: TrackerCategoryStore) {
+    convenience init(categoryStore: TrackerCategoryStore) {
+        self.init(categoryStore: categoryStore, mode: .create)
+    }
+
+    init(categoryStore: TrackerCategoryStore, mode: Mode) {
         self.categoryStore = categoryStore
+        self.mode = mode
         super.init(nibName: nil, bundle: nil)
+
+        if case let .edit(tracker, categoryTitle, completedDays) = mode {
+            self.trackerToEdit = tracker
+            self.trackerTitle = tracker.title
+            self.selectedCategory = categoryTitle
+            self.selectedSchedule = tracker.schedule
+            self.selectedEmoji = tracker.emoji
+            self.selectedColor = tracker.color
+            self.completedDaysCount = completedDays
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -241,7 +281,17 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.title = "Новая привычка"
+
+        switch mode {
+        case .create:
+            navigationItem.title = Localizable.NewTracker.title
+        case .edit:
+            navigationItem.title = Localizable.NewTracker.editTitle
+            vStack.insertArrangedSubview(daysLabel, at: 0)
+            daysLabel.text = Localizable.Tracker.daysCount(completedDaysCount)
+            createButton.setTitle(Localizable.Actions.save, for: .normal)
+        }
+
         view.backgroundColor = .systemBackground
         scrollView.alwaysBounceVertical = true
 
@@ -250,8 +300,10 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         setupConstraints()
         setupActions()
         
-        categoryOption.setTitle("Категория")
-        scheduleOption.setTitle("Расписание")
+        categoryOption.setTitle(Localizable.NewTracker.categoryTitle)
+        scheduleOption.setTitle(Localizable.NewTracker.scheduleTitle)
+        
+        nameTextField.text = trackerTitle
         
         updateDerivedUI()
         
@@ -442,21 +494,41 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
             let color = selectedColor
         else { return }
         
-        let tracker = Tracker(title: trackerTitle, color: color, emoji: emoji, schedule: selectedSchedule)
-        let categoryTitle = selectedCategory
-        
-        do {
-            try categoryStore.addTracker(tracker, toCategoryWithTitle: categoryTitle)
+        switch mode {
+        case .create:
+            let tracker = Tracker(title: trackerTitle, color: color, emoji: emoji, schedule: selectedSchedule)
+            let categoryTitle = selectedCategory
             
-            delegate?.newTrackerViewController(
-                self,
-                didCreate: tracker,
-                in: categoryTitle
+            do {
+                try categoryStore.addTracker(tracker, toCategoryWithTitle: categoryTitle)
+                
+                delegate?.newTrackerViewController(
+                    self,
+                    didCreate: tracker,
+                    in: categoryTitle
+                )
+                
+                presentingViewController?.dismiss(animated: true)
+            } catch {
+                print("Ошибка сохранения трекера: \(error)")
+            }
+        case .edit:
+            guard let original = trackerToEdit else { return }
+            let updated = Tracker(
+                id: original.id,
+                title: trackerTitle,
+                color: color,
+                emoji: emoji,
+                schedule: selectedSchedule
             )
-            
-            presentingViewController?.dismiss(animated: true)
-        } catch {
-            print("Ошибка сохранения трекера: \(error)")
+            let categoryTitle = selectedCategory
+            do {
+                try categoryStore.addTracker(updated, toCategoryWithTitle: categoryTitle)
+                delegate?.newTrackerViewController(self, didUpdate: updated, movedTo: categoryTitle)
+                presentingViewController?.dismiss(animated: true)
+            } catch {
+                print("Ошибка обновления трекера: \(error)")
+            }
         }
     }
     
@@ -479,7 +551,9 @@ final class NewTrackerViewController: UIViewController, NewScheduleViewControlle
         && selectedColor != nil
         
         createButton.isEnabled = isValid
-        createButton.backgroundColor = isValid ? .black : .lightGray
+        
+        createButton.backgroundColor = isValid ? .label : .lightGray
+        createButton.setTitleColor(isValid ? .systemBackground : .white, for: .normal)
     }
     
     // MARK: - NewScheduleViewControllerDelegate
@@ -519,11 +593,11 @@ extension NewTrackerViewController: UICollectionViewDataSource {
     ) -> Int {
         switch collectionView {
         case emojiCollectionView:
-            return emojis.count
+            emojis.count
         case colorCollectionView:
-            return colors.count
+            colors.count
         default:
-            return 0
+            0
         }
     }
     
@@ -590,7 +664,7 @@ extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         insetForSectionAt section: Int
     ) -> UIEdgeInsets {
-        return UIEdgeInsets(
+        UIEdgeInsets(
             top: UIConstants.collectionViewVerticalInset,
             left: 0,
             bottom: UIConstants.collectionViewVerticalInset,
@@ -603,7 +677,7 @@ extension NewTrackerViewController: UICollectionViewDelegateFlowLayout {
         layout collectionViewLayout: UICollectionViewLayout,
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
-        return UIConstants.collectionCellSize
+        UIConstants.collectionCellSize
     }
     
     func collectionView(

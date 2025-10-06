@@ -74,7 +74,7 @@ final class TrackerRecordStore: NSObject {
         request.predicate = NSPredicate(
             format: "trackerId == %@ AND date == %@",
             trackerId as CVarArg,
-            startOfDay as CVarArg,
+            startOfDay as CVarArg
         )
         
         request.fetchLimit = 1
@@ -127,6 +127,24 @@ final class TrackerRecordStore: NSObject {
             }
         } catch {
             print("❌ Не удалось удалить запись трекера \(record.trackerId) за \(startOfDay): \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func deleteAllRecords(for trackerId: UUID) throws {
+        let request: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "trackerId == %@", trackerId as CVarArg)
+        
+        do {
+            let objects = try context.fetch(request)
+            for object in objects {
+                context.delete(object)
+            }
+            if context.hasChanges {
+                try context.save()
+            }
+        } catch {
+            print("❌ Не удалось удалить все записи трекера id=\(trackerId): \(error.localizedDescription)")
             throw error
         }
     }

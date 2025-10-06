@@ -35,7 +35,7 @@ final class CoreDataManager {
     }()
 
     var viewContext: NSManagedObjectContext {
-        return persistentContainer.viewContext
+        persistentContainer.viewContext
     }
 
     func saveContext() {

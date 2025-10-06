@@ -23,10 +23,13 @@ final class TabBarController: UITabBarController {
         tabBar.standardAppearance = appearance
         tabBar.scrollEdgeAppearance = appearance
         
+        let trackersTitle = Localizable.Tabs.trackers
+        let statisticsTitle = Localizable.Tabs.statistics
+        
         let trackersViewController = TrackersViewController()
         let trackersNav = UINavigationController(rootViewController: trackersViewController)
         trackersNav.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: trackersTitle,
             image: UIImage(systemName: "smallcircle.filled.circle.fill"),
             selectedImage: UIImage(systemName: "smallcircle.filled.circle.fill")
         )
@@ -34,7 +37,7 @@ final class TabBarController: UITabBarController {
         let statsViewController = StatisticsViewController()
         let statsNav = UINavigationController(rootViewController: statsViewController)
         statsNav.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: statisticsTitle,
             image: UIImage(systemName: "hare.fill"),
             selectedImage: UIImage(systemName: "hare.fill")
         )

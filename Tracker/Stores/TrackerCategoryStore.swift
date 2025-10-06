@@ -82,7 +82,7 @@ final class TrackerCategoryStore: NSObject {
     }
     
     func category(withTitle title: String) -> TrackerCategory? {
-        return fetchCategories().first { $0.title == title }
+        fetchCategories().first { $0.title == title }
     }
     
     func fetchCategoryObject(withTitle title: String) -> TrackerCategoryCoreData? {
@@ -134,16 +134,50 @@ final class TrackerCategoryStore: NSObject {
     }
     
     func deleteCategory(withTitle title: String) throws {
-        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        request.predicate = NSPredicate(format: "title == %@", title)
-        do {
-            let objects = try context.fetch(request)
-            for object in objects {
+        let uncategorizedTitle = Localizable.Categories.uncategorizedTitle
+        
+        if title == uncategorizedTitle {
+            if let object = fetchCategoryObject(withTitle: title),
+               let trackers = object.trackers as? Set<TrackerCoreData>,
+               trackers.isEmpty {
                 context.delete(object)
+                do {
+                    try context.save()
+                } catch {
+                    print("❌ Не удалось удалить пустую категорию '\(title)': \(error.localizedDescription)")
+                    throw error
+                }
             }
+            return
+        }
+        
+        guard let categoryToDelete = fetchCategoryObject(withTitle: title) else { return }
+        
+        let trackersSet = (categoryToDelete.trackers as? Set<TrackerCoreData>) ?? []
+        
+        if trackersSet.isEmpty {
+            context.delete(categoryToDelete)
+        } else {
+            let targetCategory: TrackerCategoryCoreData
+            if let existing = fetchCategoryObject(withTitle: uncategorizedTitle) {
+                targetCategory = existing
+            } else {
+                let newCategory = TrackerCategoryCoreData(context: context)
+                newCategory.title = uncategorizedTitle
+                targetCategory = newCategory
+            }
+            
+            for tracker in trackersSet {
+                tracker.category = targetCategory
+            }
+            
+            context.delete(categoryToDelete)
+        }
+        
+        do {
             try context.save()
         } catch {
-            print("❌ Не удалось удалить категорию '\(title)': \(error.localizedDescription)")
+            print("❌ Не удалось удалить/перенести категорию '\(title)': \(error.localizedDescription)")
             throw error
         }
     }

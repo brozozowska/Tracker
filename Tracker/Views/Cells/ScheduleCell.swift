@@ -21,7 +21,7 @@ final class ScheduleCell: UITableViewCell {
     // MARK: - UI Elements
     private lazy var containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .secondarySystemBackground
         view.clipsToBounds = true
         return view
     }()
@@ -41,7 +41,7 @@ final class ScheduleCell: UITableViewCell {
 
     private lazy var divider: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemGray4
+        view.backgroundColor = .separator
         return view
     }()
     

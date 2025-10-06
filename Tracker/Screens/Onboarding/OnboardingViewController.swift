@@ -13,12 +13,12 @@ final class OnboardingViewController: UIPageViewController {
     private lazy var pages: [UIViewController] = {
         let page1 = OnboardingPageViewController(
             backgroundImage: UIImage(resource: .background1),
-            text: "Отслеживайте только то, что хотите"
+            text: Localizable.Onboarding.page1Text
         )
         
         let page2 = OnboardingPageViewController(
             backgroundImage: UIImage(resource: .background2),
-            text: "Даже если это не литры воды и йога"
+            text: Localizable.Onboarding.page2Text
         )
         
         return [page1, page2]
@@ -35,7 +35,7 @@ final class OnboardingViewController: UIPageViewController {
     
     private lazy var actionButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Вот это технологии!", for: .normal)
+        button.setTitle(Localizable.Onboarding.actionTitle, for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .black
         button.layer.cornerRadius = 16
@@ -136,6 +136,5 @@ extension OnboardingViewController: UIPageViewControllerDelegate {
 
 // MARK: - Preview
 #Preview {
-    let viewController = OnboardingViewController()
-    return viewController
+    OnboardingViewController()
 }

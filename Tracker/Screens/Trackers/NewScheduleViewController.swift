@@ -39,9 +39,9 @@ final class NewScheduleViewController: UIViewController {
     
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
-        button.backgroundColor = .black
-        button.setTitleColor(.white, for: .normal)
+        button.setTitle(Localizable.Actions.done, for: .normal)
+        button.backgroundColor = .label
+        button.setTitleColor(.systemBackground, for: .normal)
         button.layer.cornerRadius = UIConstants.cornerRadius
         return button
     }()
@@ -52,7 +52,6 @@ final class NewScheduleViewController: UIViewController {
     // MARK: - Private Properties
     private var selectedSchedule: [WeekDay]
     private let dayNames = WeekDay.allCases
-
 
     // MARK: - Initializers
     init(selectedDays: [WeekDay]) {
@@ -68,7 +67,7 @@ final class NewScheduleViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        navigationItem.title = "Расписание"
+        navigationItem.title = Localizable.Schedule.screenTitle
         
         setupTableView()
         setupSubviews()
@@ -137,18 +136,16 @@ extension NewScheduleViewController: UITableViewDataSource {
         
         let day = dayNames[indexPath.row]
         cell.configure(
-            day: day.rawValue,
+            day: day.longName,
             isOn: selectedSchedule.contains(day),
             isFirst: indexPath.row == 0,
             isLast: indexPath.row == dayNames.count - 1
         )
         cell.switchChanged = { [weak self] isOn in
             guard let self = self else { return }
-            if isOn {
-                self.selectedSchedule.append(day)
-            } else {
-                self.selectedSchedule.removeAll { $0 == day }
-            }
+            isOn
+            ? self.selectedSchedule.append(day)
+            : self.selectedSchedule.removeAll { $0 == day }
         }
         return cell
     }
